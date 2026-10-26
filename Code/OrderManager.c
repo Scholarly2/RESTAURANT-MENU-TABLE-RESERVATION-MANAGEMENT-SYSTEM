@@ -4,36 +4,36 @@
 int createOrderTable(int type, int reservationID, int tableID,int guests, double distance){
     //so luong ban se dat
     int n;
-    printf("So luong ban se dat: ");
+    printf("Enter amount of table: ");
     if(scanf("%d", &n) != 1 || n <= 0){
-        printf("So luong ban khong hop le.\n");
+        printf("Amount of table is invalid.\n");
         return -1;
     };
     //tao order moi
     for(int i = 0; i < n; i++){
-        printf("ID ban: ");
+        printf("Enter table ID: ");
         if(scanf("%d", &tableID) != 1 || tableID <= 0){
-            printf("ID ban khong hop le.\n");
+            printf("table ID is invalid.\n");
             return -1;
         }
-        printf("Ma dat ban: ");
+        printf("Enter the reservation ID: ");
         if(scanf("%d", &reservationID) != 1 || reservationID <= 0){
-            printf("Ma dat ban khong hop le.\n");
+            printf("Reservation ID is invalid.\n");
             return -1;
         }
-        printf("So luong khach: ");
+        printf("Enter amount of quests: ");
         if(scanf("%d", &guests) != 1 || guests <= 0){
             printf("So luong khach khong hop le.\n");
             return -1;
         }
-        printf("Nhap loai ban se dat (2, 4, 6 nguoi): ");
+        printf("Enter the type of the table (2, 4, 6): ");
         if(scanf("%d", &type) != 1 || (type != 2 && type != 4 && type != 6)){
-            printf("Loai ban khong hop le.\n");
+            printf("Type of table is invalid.\n");
             return -1;
         }
-        printf("khoang cach cua khach hang den nha hang (km): ");
+        printf("Enter the distance to the restaurant (km): ");
         if(scanf("%lf", &distance) != 1 || distance < 0){
-            printf("Khoang cach khong hop le.\n");
+            printf("The distance is invalid.\n");
             return -1;
         }
     }
@@ -60,27 +60,27 @@ int addOrderFood(int orderID, int productID, int quantity){
     // di tim order bang ID
     int orderIndex = findOrderByID(&S, orderID);
     if(orderIndex == -1 || orderIndex >= S.orderCount || S.orders[orderIndex].orderStatus != ORDER_OPEN){
-        printf("Order khong ton tai.\n");
+        printf("Order is invalid.\n");
         return -1;
     }
 
     // neu tim thay thi in ra listProduct -> roi nhap ID mon an trong List
     printlistProduct(S.products, S.productCount);
-    printf("Nhap ID mon an: ");
+    printf("Enter the product ID: ");
     if(scanf("%d", &productID) != 1 || productID <= 0){
-        printf("ID mon an khong hop le.\n");
+        printf("The product ID is invalid.\n");
         return -1;
     }
     int productID = findProductByID(&S, productID);
     if(productID < 0 || productID >= S.productCount || S.products[productID].productStatus == PRODUCT_UNAVAILABLE){
-        printf("Mon an khong ton tai hoac khong con trong kho.\n");
+        printf("The produc does not exist and is no longer in stock.\n");
         return -1;
     }
 
     // nhap so luong mon an muon them vao 
-    printf("Nhap so luong mon an: ");
+    printf("Enter the number of quantity: ");
     if(scanf("%d", &quantity) < 1 || quantity > MAX_QUANTITY){
-        printf("So luong khong hop le.\n");
+        printf("Quantity is invaild.\n");
         return -1;
     }
     int itemIndex = findOrderItem(&S.orders[orderIndex], productID);
@@ -89,11 +89,11 @@ int addOrderFood(int orderID, int productID, int quantity){
         int currentQuantity = S.orders[orderIndex].items[itemIndex].quantity;
     }
     else if(itemIndex == 1){
-        printf("Khong hop le\n.");
+        printf("Invaild\n.");
     }
     
 
-    printf("Them mon an vao order thanh cong.\n");
+    printf("Add order food is successfull.\n");
     return 0;
 }
 
