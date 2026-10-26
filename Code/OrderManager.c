@@ -76,34 +76,25 @@ int addOrderFood(int orderID, int productID, int quantity){
         printf("Mon an khong ton tai hoac khong con trong kho.\n");
         return -1;
     }
+
+    // nhap so luong mon an muon them vao 
     printf("Nhap so luong mon an: ");
-    if(scanf("%d", &quantity) != 1 || quantity <= 0){
+    if(scanf("%d", &quantity) < 1 || quantity > MAX_QUANTITY){
         printf("So luong khong hop le.\n");
         return -1;
     }
     int itemIndex = findOrderItem(&S.orders[orderIndex], productID);
-    if (itemIndex >= 0) {
+    int oldQuanity = 0;
+    if (itemIndex >= 0 ) {
         int currentQuantity = S.orders[orderIndex].items[itemIndex].quantity;
     }
+    else if(itemIndex == 1){
+        printf("Khong hop le\n.");
+    }
+    
 
     printf("Them mon an vao order thanh cong.\n");
     return 0;
-}
-
-int updateOrderFood(int orderID, int productID, int newQuantity){
-    int findOrderID = findOrderByID(&S, orderID);
-    if(findOrderID == -1 || S.orders->items->quantity < 1 || S.orders->items->quantity > MAX_QUANTITY){
-        return FALSE;
-    }
-    int findOrder = findOrderItem(&S.orders[findOrderID], productID);
-    int oldQuanity = 0;
-    if (findOrder == - 1){
-        return FALSE;
-    }
-    else{
-        oldQuanity = S.orders[findOrder].items[findOrderID].quantity;
-    }
-
 }
 
 
