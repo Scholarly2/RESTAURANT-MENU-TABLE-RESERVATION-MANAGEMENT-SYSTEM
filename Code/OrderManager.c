@@ -162,6 +162,15 @@ int createOrderTable(int type, int reservationID, int tableID, int guests, doubl
     return 0;
 }
 
+int findOrderByID(const State*s, int id){
+    //tim kiem bang ID
+    for(int i = 0; i < s->orderCount; i++){
+        if(s->orders[i].orderID  == id)
+            return i;
+    }
+    return -1;
+}
+
 int addOrderFood(int orderID, int productID, int quantity){
 
     // di tim order bang ID
@@ -233,8 +242,8 @@ int addOrderFood(int orderID, int productID, int quantity){
     char oldValue[20];
     char newValue[20];
 
-    printf(oldValue, "%d", oldQuantity);
-    printf(newValue, "%d", newQuantity);
+    sprintf(oldValue, "%d", oldQuantity);
+    sprintf(newValue, "%d", newQuantity);
 
     if(!commitChange(copy, "ADD_FOOD", orderID, oldValue, newValue)){
         printf("Cannot save order food.\n");
@@ -248,9 +257,10 @@ int updateOrderFood(int orderID, int productID, int newQuantity){
 
     //tim kiem order bang ID
     int findOrderIndexByID = findOrderByID(&S, orderID);
-    if(findOrderIndexByID == -1 || S.orders[findOrderIndexByID].orderStatus != ORDER_OPEN){
+    if(findOrderIndexByID == -1 || S.orders[findOrderIndexByID].orderStatus != ORDER_OPEN || findOrderIndexByID >= S.orderCount){
         return FALSE;
     }
+    showAllOrderItem(&S.orders[findOrderIndexByID]);
     // bat dau tim kiem san pham trong order do
     int findOrderItemIndex = findOrderItem(&S.orders[findOrderIndexByID], productID);
     if(findOrderItemIndex == -1){
@@ -264,7 +274,7 @@ int updateOrderFood(int orderID, int productID, int newQuantity){
 
     // lay so luong cu
     int oldQuantity = S.orders[findOrderIndexByID].items[findOrderItemIndex].quantity;
-    int copy = copyState(&S);
+    State *copy = copyState(&S);
     if(copy == NULL){
         return FALSE;
     }
@@ -276,8 +286,8 @@ int updateOrderFood(int orderID, int productID, int newQuantity){
     char oldValue[20];
     char newValue[20];
 
-    printf(oldValue, "%d", oldQuantity);
-    printf(newValue, "%d", newQuantity);
+    sprintf(oldValue, "%d", oldQuantity);
+    sprintf(newValue, "%d", newQuantity);
 
     // luu thay doi
     if(!commitChange(copy, "UPDATE_FOOD", orderID, oldValue, newValue)){
