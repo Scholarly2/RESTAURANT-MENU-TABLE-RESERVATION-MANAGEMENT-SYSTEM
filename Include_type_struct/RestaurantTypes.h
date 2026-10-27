@@ -175,8 +175,7 @@ int findOrderItem(const Order *order, int productID);
 int findOpenOrder(const State *s, int tableID, int reservationID);
 int appendEmptyOrder(State *s, int type, int reservationID, int tableID,
                      int guests, double distance);
-int createOrderTable(int type, int reservationID, int tableID,
-                     int guests, double distance);
+int createOrderTable(int type, int tableID, int guests, double distance);
 int heldQuantity(const State *s, int productID);
 int changeOrderQuantity(State *s, int orderIndex, int productID, int newQuantity);
 int addOrderFood(int orderID, int productID, int quantity);

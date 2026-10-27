@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <RestaurantTypes.h>
+#include <stdlib.h>
 
 int createOrderTable(int type, int reservationID, int tableID, int guests, double distance){
 
@@ -50,7 +51,7 @@ int createOrderTable(int type, int reservationID, int tableID, int guests, doubl
             else{
 
                 printf("Enter table ID: ");
-                if(scanf("%d", &tableID) != 1){
+                if(scanf("%d", &tableID) != 1 || tableID < 1 || tableID > 100){
                     printf("Table ID is invalid.\n");
                     return -1;
                 }
@@ -165,42 +166,82 @@ int addOrderFood(int orderID, int productID, int quantity){
 
     // di tim order bang ID
     int orderIndex = findOrderByID(&S, orderID);
+
     if(orderIndex == -1 || orderIndex >= S.orderCount || S.orders[orderIndex].orderStatus != ORDER_OPEN){
         printf("Order is invalid.\n");
         return -1;
     }
 
-    // neu tim thay thi in ra listProduct -> roi nhap ID mon an trong List
-    printlistProduct(S.products, S.productCount);
+    // in danh sach mon an
+    printListProduct(S.products, S.productCount);
+
     printf("Enter the product ID: ");
     if(scanf("%d", &productID) != 1 || productID <= 0){
         printf("The product ID is invalid.\n");
         return -1;
     }
-    int productID = findProductByID(&S, productID);
-    if(productID < 0 || productID >= S.productCount || S.products[productID].productStatus == PRODUCT_UNAVAILABLE){
-        printf("The produc does not exist and is no longer in stock.\n");
+
+    // kiem tra mon an
+    int productIndex = findProductByID(&S, productID);
+
+    if(productIndex == -1 || productIndex >= S.productCount || S.products[productIndex].productStatus == PRODUCT_UNAVAILABLE){
+        printf("The product does not exist or is unavailable.\n");
         return -1;
     }
 
-    // nhap so luong mon an muon them vao 
-    printf("Enter the number of quantity: ");
-    if(scanf("%d", &quantity) < 1 || quantity > MAX_QUANTITY){
-        printf("Quantity is invaild.\n");
+    // nhap so luong mon an muon them vao
+    printf("Enter the quantity: ");
+    if(scanf("%d", &quantity) != 1 ||
+       quantity < 1 || quantity > MAX_QUANTITY){
+        printf("Quantity is invalid.\n");
         return -1;
     }
+
+    // tim mon an trong order
     int itemIndex = findOrderItem(&S.orders[orderIndex], productID);
-    int oldQuanity = 0;
-    if (itemIndex >= 0 ) {
-        int currentQuantity = S.orders[orderIndex].items[itemIndex].quantity;
-    }
-    else if(itemIndex == 1){
-        printf("Invaild\n.");
-    }
-    
 
-    printf("Add order food is successfull.\n");
-    return 0;
+    int oldQuantity = 0;
+
+    if(itemIndex != -1){
+        oldQuantity = S.orders[orderIndex].items[itemIndex].quantity;
+    }
+
+    // kiem tra tong so luong
+    if(quantity > MAX_QUANTITY - oldQuantity){
+        printf("Total quantity exceeds the maximum limit.\n");
+        return -1;
+    }
+
+    int newQuantity = oldQuantity + quantity;
+
+    // copy state
+    State *copy = copyState(&S);
+
+    if(copy == NULL){
+        printf("Cannot copy state.\n");
+        return -1;
+    }
+
+    // them mon an vao order va cap nhat ton kho
+    if(!changeOrderQuantity(copy, orderIndex, productID, newQuantity)){
+        free(copy);
+        printf("Cannot add food to order.\n");
+        return -1;
+    }
+
+    // luu thay doi
+    char oldValue[20];
+    char newValue[20];
+
+    printf(oldValue, "%d", oldQuantity);
+    printf(newValue, "%d", newQuantity);
+
+    if(!commitChange(copy, "ADD_FOOD", orderID, oldValue, newValue)){
+        printf("Cannot save order food.\n");
+        return -1;
+    }
+
+    printf("Add order food successfully.\n");
+    return 1;
 }
-
 
