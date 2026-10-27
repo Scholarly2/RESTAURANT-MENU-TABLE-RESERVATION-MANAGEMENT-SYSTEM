@@ -244,4 +244,48 @@ int addOrderFood(int orderID, int productID, int quantity){
     printf("Add order food successfully.\n");
     return 1;
 }
+int updateOrderFood(int orderID, int productID, int newQuantity){
+
+    //tim kiem order bang ID
+    int findOrderIndexByID = findOrderByID(&S, orderID);
+    if(findOrderIndexByID == -1 || S.orders[findOrderIndexByID].orderStatus != ORDER_OPEN){
+        return FALSE;
+    }
+    // bat dau tim kiem san pham trong order do
+    int findOrderItemIndex = findOrderItem(&S.orders[findOrderIndexByID], productID);
+    if(findOrderItemIndex == -1){
+        return FALSE;
+    }
+
+    // kiem tra so luong moi co hop le khong
+    if (newQuantity < 1 || newQuantity > MAX_QUANTITY){
+        return FALSE;
+    }
+
+    // lay so luong cu
+    int oldQuantity = S.orders[findOrderIndexByID].items[findOrderItemIndex].quantity;
+    int copy = copyState(&S);
+    if(copy == NULL){
+        return FALSE;
+    }
+    if(!changeOrderQuantity(copy, findOrderIndexByID, productID, newQuantity)){
+        free(copy);
+        return FALSE;
+    }
+        // chuyen so luong thanh chuoi
+    char oldValue[20];
+    char newValue[20];
+
+    printf(oldValue, "%d", oldQuantity);
+    printf(newValue, "%d", newQuantity);
+
+    // luu thay doi
+    if(!commitChange(copy, "UPDATE_FOOD", orderID, oldValue, newValue)){
+        printf("Cannot save updated order food.\n");
+        return FALSE;
+    }
+
+    printf("Update order food successfully.\n");
+    return TRUE;
+}
 
