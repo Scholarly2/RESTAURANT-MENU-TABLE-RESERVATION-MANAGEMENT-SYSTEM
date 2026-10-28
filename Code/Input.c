@@ -9,7 +9,29 @@
 #define INPUT_BUFFER_SIZE 1256
 
 //check input product item - UYEN
+//check dinh dang name product
+int isValidProductName(const char *name)
+{
+    int i;
 
+    if (!isValidName(name)) {
+        return FALSE;
+    }
+
+    for (i = 0; name[i] != '\0'; i++) {
+        if (name[i] == '_') {
+            if (i == 0 ||
+                name[i + 1] == '\0' ||
+                name[i + 1] == '_') {
+                return FALSE;
+            }
+        } else if (name[i] < 'A' || name[i] > 'Z') {
+            return FALSE;
+        }
+    }
+
+    return TRUE;
+}
 //doc dong
 int readLine(char *text, int size)
 {

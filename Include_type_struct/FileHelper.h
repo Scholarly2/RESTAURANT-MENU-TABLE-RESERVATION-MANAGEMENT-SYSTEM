@@ -6,6 +6,7 @@
 int saveAllData(const State *s);
 #define PRODUCT_FILE "products.txt"
 
+
 //load and save data product
 int loadProducts(State *changing, const char *path);
 int saveProducts(const State *s, const char *path);

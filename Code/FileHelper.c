@@ -109,7 +109,7 @@ int loadProducts(State *changing, const char *path)
 
         for(j=0; i<i; j++)
         {
-            if(products[j].productID == id)
+            if(products[j].productID == id) //checkID
             {
                 fclose(file);
                 return FALSE;
@@ -222,3 +222,5 @@ int saveProducts(const State *s, const char *path)
     }
     return success;
 }
+
+

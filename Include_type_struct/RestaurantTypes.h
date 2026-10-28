@@ -19,7 +19,16 @@
 #define MAX_DISTANCE 1000.0
 
 //enum
-enum ProductType {
+enum ProductUPDATE
+{
+    UP_Name = 1,
+    UP_PRICE,
+    UP_TYPE,
+    UP_QUANTITY,
+    UP_STATUS
+};
+enum ProductType 
+{
     STARTER = 1, MAINDISH, SIDEDISH, DESSERT, DRINK
 };
 enum ProductStatus { PRODUCT_AVAILABLE = 0, PRODUCT_UNAVAILABLE };
@@ -134,22 +143,26 @@ int validateState(const State *s);
 int commitChange(State *candidate, const char *actionType, int targetID,
                  const char *oldValue, const char *newValue);
 
+
 //function pproduct
 int findProductByID(const State *s, int id);
 int generateProductID(const State *s);
-int addProduct(const char *name, int type, double price, int quantity);
+int addProduct(void);
 int updatePrice(MenuItem *item, double value);
 int updateName(MenuItem *item, const char *value);
 int updateType(MenuItem *item, int value);
 int updateQuantity(MenuItem *item, int value);
 int updateStatus(MenuItem *item, int value);
-int updateProduct(int id, int field, const char *text, double number);
-int deleteProduct(int id);
+int updateProduct(void); //change input function
+int deleteProduct(void);
 void searchProductByName(const char *keyword);
 void searchProductByType(int type);
 void sortByPrice(void);
 void sortByName(void);
 void printListProduct(const MenuItem *list, int count);
+void productMenu(void);
+void sortByID(void);
+void searchProductByID(int id);
 
 //function table
 int findTableByID(const State *s, int id);
@@ -166,7 +179,7 @@ int createReservation(const char *nameCustomer, const char *phoneNumber,
                       int NumberCustomer, DateTime timeBooking,
                       int tableType, int requestedTableID);
 int cancelReservation(const char* phoneNumber);
-int checkInReservation(const char* phoneNumber);
+int checkInReservation(const char* phoneNumber); //change reservationID -> phoneNumber
 void sortBookingByTime(void);
 
 //function order va quan li ton kho
