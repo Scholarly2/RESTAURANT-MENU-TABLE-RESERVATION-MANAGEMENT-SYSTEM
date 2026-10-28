@@ -9,10 +9,8 @@
 #include "OrderManager.h"
 #include "BillManager.h"
 #include "menu.h"
+#define MENU_WIDTH    52  
 
-#define MENU_WIDTH    52    /* total width of a menu box, including both borders */
-
-/* Menu labels (item numbers are added automatically, starting from 1) */
 static const char *const MAIN_ITEMS[] = {
     "Menu Item Management",
     "Table Management",
@@ -55,7 +53,6 @@ static const char *const ORDER_ITEMS[] = {
 
 /* ===================== DRAWING HELPERS ===================== */
 
-/* Prints a horizontal line: +-----...-----+ */
 void printBorder(char fill)
 {
     int i;
@@ -65,7 +62,6 @@ void printBorder(char fill)
     printf("+\n");
 }
 
-/* Prints text centered inside the box: |     text     | */
 void printCentered(const char *text)
 {
     int inner = MENU_WIDTH - 2;
@@ -79,15 +75,13 @@ void printCentered(const char *text)
     printf("|%*s%.*s%*s|\n", left, "", len, text, right, "");
 }
 
-/* Prints one menu row: |  1. Label            | */
 void printMenuItem(int number, const char *label)
 {
-    int labelWidth = MENU_WIDTH - 2 - 6;     /* 2 borders, 6 = "  N.  " prefix */
+    int labelWidth = MENU_WIDTH - 2 - 6;     
 
     printf("|  %d.  %-*.*s|\n", number, labelWidth, labelWidth, label);
 }
 
-/* Draws a full menu box: title, numbered items 1..n, then item 0 at the bottom */
 void printMenu(const char *title, const char *const items[], int itemCount,
                const char *zeroLabel)
 {
@@ -117,7 +111,7 @@ void showMainMenu(Table *tables, int tableCount, Product *products, int *product
                   MAIN_ITEMS, ARRAY_SIZE(MAIN_ITEMS), "Save & Exit");
 
         r = readInt(" >> Enter your choice: ", &choice);
-        if (r == -1) {                       /* end of input -> exit */
+        if (r == -1) {                       
             choice = 0;
             printf("\n");
         } else if (r == 0 || choice < 0 || choice > 4) {
@@ -148,19 +142,19 @@ void showModuleMenu(int module, Table *tables, int tableCount,
 
     do {
         switch (module) {
-            case 1:  /* Menu Item Management */
+            case 1:  
                 printMenu("MENU ITEM MANAGEMENT",
                           PRODUCT_ITEMS, ARRAY_SIZE(PRODUCT_ITEMS), "Back");
                 break;
-            case 2:  /* Table Management */
+            case 2:  
                 printMenu("TABLE MANAGEMENT",
                           TABLE_ITEMS, ARRAY_SIZE(TABLE_ITEMS), "Back");
                 break;
-            case 3:  /* Table Reservation */
+            case 3:  
                 printMenu("TABLE RESERVATION",
                           RESERVATION_ITEMS, ARRAY_SIZE(RESERVATION_ITEMS), "Back");
                 break;
-            case 4:  /* Ordering & Billing */
+            case 4:  
                 printMenu("ORDERING & BILLING",
                           ORDER_ITEMS, ARRAY_SIZE(ORDER_ITEMS), "Back");
                 break;
@@ -169,7 +163,7 @@ void showModuleMenu(int module, Table *tables, int tableCount,
         }
 
         r = readInt(" >> Enter your choice: ", &choice);
-        if (r == -1) {                       /* end of input -> go back */
+        if (r == -1) {                       
             choice = 0;
             continue;
         }
