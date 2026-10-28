@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <RestaurantTypes.h>
 #include <stdlib.h>
+#include <math.h>
 
 int createOrderTable(int type, int reservationID, int tableID, int guests, double distance){
 
@@ -9,7 +10,7 @@ int createOrderTable(int type, int reservationID, int tableID, int guests, doubl
     printf("Enter amount of order: ");
     if(scanf("%d", &n) != 1 || n <= 0){
         printf("Amount of order is invalid.\n");
-        return -1;
+        return FALSE;
     }
 
     // tao order moi
@@ -18,7 +19,7 @@ int createOrderTable(int type, int reservationID, int tableID, int guests, doubl
         printf("Enter customer type (DINE_IN / TAKEAWAY / DELIVERY): ");
         if(scanf("%d", &type) != 1 || type < DINE_IN || type > DELIVERY){
             printf("Customer type is invalid.\n");
-            return -1;
+            return FALSE;
         }
 
         // DINE IN
@@ -27,7 +28,7 @@ int createOrderTable(int type, int reservationID, int tableID, int guests, doubl
             printf("Enter reservation ID (0 if no reservation): ");
             if(scanf("%d", &reservationID) != 1 || reservationID < 0){
                 printf("Reservation ID is invalid.\n");
-                return -1;
+                return FALSE;
             }
 
             if(reservationID > 0){
@@ -37,7 +38,7 @@ int createOrderTable(int type, int reservationID, int tableID, int guests, doubl
                 if(reservationIndex == -1 ||
                    S.reservations[reservationIndex].reservationStatus != WAITING){
                     printf("Reservation is invalid.\n");
-                    return -1;
+                    return FALSE;
                 }
 
                 tableID = S.reservations[reservationIndex].tableID;
@@ -45,7 +46,7 @@ int createOrderTable(int type, int reservationID, int tableID, int guests, doubl
 
                 if(findOpenOrder(&S, 0, reservationID) != -1){
                     printf("There is already an open order for this reservation.\n");
-                    return -1;
+                    return FALSE;
                 }
             }
             else{
@@ -53,20 +54,20 @@ int createOrderTable(int type, int reservationID, int tableID, int guests, doubl
                 printf("Enter table ID: ");
                 if(scanf("%d", &tableID) != 1 || tableID < 1 || tableID > 100){
                     printf("Table ID is invalid.\n");
-                    return -1;
+                    return FALSE;
                 }
 
                 printf("Enter number of guests: ");
                 if(scanf("%d", &guests) != 1 || guests < 1 || guests > 8){
                     printf("Number of guests is invalid.\n");
-                    return -1;
+                    return FALSE;
                 }
 
                 int tableIndex = findTableByID(&S, tableID);
 
                 if(tableIndex == -1){
                     printf("Table is invalid.\n");
-                    return -1;
+                    return FALSE;
                 }
 
                 if(S.tables[tableIndex].tableStatus == TABLE_SERVING){
@@ -75,7 +76,7 @@ int createOrderTable(int type, int reservationID, int tableID, int guests, doubl
 
                     if(openOrderIndex == -1 || S.orders[openOrderIndex].isPreOrder){
                         printf("Cannot use existing order.\n");
-                        return -1;
+                        return FALSE;
                     }
 
                     printf("Use existing order %d.\n",
@@ -86,12 +87,12 @@ int createOrderTable(int type, int reservationID, int tableID, int guests, doubl
 
                 if(S.tables[tableIndex].tableStatus != TABLE_AVAILABLE){
                     printf("Table is not available.\n");
-                    return -1;
+                    return FALSE;
                 }
 
                 if(guests > S.tables[tableIndex].tableType){
                     printf("Number of guests exceeds table capacity.\n");
-                    return -1;
+                    return FALSE;
                 }
             }
 
@@ -111,12 +112,12 @@ int createOrderTable(int type, int reservationID, int tableID, int guests, doubl
                distance < 0 ||
                distance > MAX_DISTANCE){
                 printf("Distance is invalid.\n");
-                return -1;
+                return FALSE;
             }
 
             if(type == TAKEAWAY && distance != 0){
                 printf("Takeaway distance must be 0.\n");
-                return -1;
+                return FALSE;
             }
         }
 
@@ -125,7 +126,7 @@ int createOrderTable(int type, int reservationID, int tableID, int guests, doubl
 
         if(c == NULL){
             printf("Cannot copy state.\n");
-            return -1;
+            return FALSE;
         }
 
         // tao order trong state copy
@@ -136,7 +137,7 @@ int createOrderTable(int type, int reservationID, int tableID, int guests, doubl
         if(orderIndex == -1){
             free(c);
             printf("Cannot create order.\n");
-            return -1;
+            return FALSE;
         }
 
         // cap nhat trang thai ban
@@ -145,7 +146,7 @@ int createOrderTable(int type, int reservationID, int tableID, int guests, doubl
             if(!updateStatusAutoTable(c, tableID, CHECK_IN)){
                 free(c);
                 printf("Cannot update table status.\n");
-                return -1;
+                return FALSE;
             }
         }
 
@@ -154,12 +155,12 @@ int createOrderTable(int type, int reservationID, int tableID, int guests, doubl
 
         if(!commitChange(c, "CREATE_ORDER", newOrderID, "-", "OPEN")){
             printf("Cannot save order.\n");
-            return -1;
+            return FALSE;
         }
 
         printf("Create order successfully. Order ID: %d\n", newOrderID);
     }
-    return 0;
+    return TRUE;
 }
 
 int findOrderByID(const State*s, int id){
@@ -174,11 +175,13 @@ int findOrderByID(const State*s, int id){
 int addOrderFood(int orderID, int productID, int quantity){
 
     // di tim order bang ID
-    int orderIndex = findOrderByID(&S, orderID);
+    printf("Enter the order you want to find: ");
+    scanf("%d", &orderID);
+    int orderIndex = findOrderByID(&S, orderID);   
 
     if(orderIndex == -1 || orderIndex >= S.orderCount || S.orders[orderIndex].orderStatus != ORDER_OPEN){
         printf("Order is invalid.\n");
-        return -1;
+        return FALSE;
     }
 
     // in danh sach mon an
@@ -187,7 +190,7 @@ int addOrderFood(int orderID, int productID, int quantity){
     printf("Enter the product ID: ");
     if(scanf("%d", &productID) != 1 || productID <= 0){
         printf("The product ID is invalid.\n");
-        return -1;
+        return FALSE;
     }
 
     // kiem tra mon an
@@ -195,7 +198,7 @@ int addOrderFood(int orderID, int productID, int quantity){
 
     if(productIndex == -1 || productIndex >= S.productCount || S.products[productIndex].productStatus == PRODUCT_UNAVAILABLE){
         printf("The product does not exist or is unavailable.\n");
-        return -1;
+        return FALSE;
     }
 
     // nhap so luong mon an muon them vao
@@ -203,7 +206,7 @@ int addOrderFood(int orderID, int productID, int quantity){
     if(scanf("%d", &quantity) != 1 ||
        quantity < 1 || quantity > MAX_QUANTITY){
         printf("Quantity is invalid.\n");
-        return -1;
+        return FALSE;
     }
 
     // tim mon an trong order
@@ -218,7 +221,7 @@ int addOrderFood(int orderID, int productID, int quantity){
     // kiem tra tong so luong
     if(quantity > MAX_QUANTITY - oldQuantity){
         printf("Total quantity exceeds the maximum limit.\n");
-        return -1;
+        return FALSE;
     }
 
     int newQuantity = oldQuantity + quantity;
@@ -228,14 +231,14 @@ int addOrderFood(int orderID, int productID, int quantity){
 
     if(copy == NULL){
         printf("Cannot copy state.\n");
-        return -1;
+        return FALSE;
     }
 
     // them mon an vao order va cap nhat ton kho
     if(!changeOrderQuantity(copy, orderIndex, productID, newQuantity)){
         free(copy);
         printf("Cannot add food to order.\n");
-        return -1;
+        return FALSE;
     }
 
     // luu thay doi
@@ -247,21 +250,26 @@ int addOrderFood(int orderID, int productID, int quantity){
 
     if(!commitChange(copy, "ADD_FOOD", orderID, oldValue, newValue)){
         printf("Cannot save order food.\n");
-        return -1;
+        return FALSE;
     }
 
     printf("Add order food successfully.\n");
-    return 1;
+    return TRUE;
 }
 int updateOrderFood(int orderID, int productID, int newQuantity){
 
     //tim kiem order bang ID
+    printf("Enter the order you want to find: ");
+    scanf("%d", &orderID);
+
     int findOrderIndexByID = findOrderByID(&S, orderID);
     if(findOrderIndexByID == -1 || S.orders[findOrderIndexByID].orderStatus != ORDER_OPEN || findOrderIndexByID >= S.orderCount){
         return FALSE;
     }
     showAllOrderItem(&S.orders[findOrderIndexByID]);
     // bat dau tim kiem san pham trong order do
+    printf("Enter ID of the product: ");
+    scanf("%d", &productID);
     int findOrderItemIndex = findOrderItem(&S.orders[findOrderIndexByID], productID);
     if(findOrderItemIndex == -1){
         return FALSE;
@@ -298,4 +306,62 @@ int updateOrderFood(int orderID, int productID, int newQuantity){
     printf("Update order food successfully.\n");
     return TRUE;
 }
+int deleteOrderFood(int orderID, int productID){
 
+    //Kiem order bang ID
+    printf("Enter the order you want to find: ");
+    scanf("%d", &orderID);
+
+    int findOrderIndexByID = findOrderByID(&S, orderID);
+    if(findOrderIndexByID == -1 || S.orders[findOrderIndexByID].orderStatus != ORDER_OPEN || findOrderIndexByID >= S.orderCount){
+        return FALSE;
+    }
+    showAllOrderItem(&S.orders[findOrderIndexByID]);
+    
+    // tim product bang id cua order
+    printf("Enter ID of the product: ");
+    scanf("%d", &productID);
+    int findOrderItemIndex = findOrderItem(&S.orders[findOrderIndexByID], productID);
+    if(findOrderItemIndex == -1){
+        return FALSE;
+    }
+
+    //Nhap de xoa
+    State *copy = copyState(&S);
+    if(copy == NULL){
+        return FALSE;
+    }
+
+    int choice;
+    printf("Product: %d ", S.orders[findOrderIndexByID].items[findOrderItemIndex].productName);
+    printf("1.Delete\n2.Cancel\nYour choice: ");
+    if(scanf("%d", &choice) != 1){
+        printf("Invaild choose!");
+        return FALSE;
+    }
+    if(choice == 2){
+        printf("Delete cancelled!");
+        return FALSE;
+    }
+    if(choice == -1 ){
+        printf("Invaild choose!");
+        return FALSE;
+    }
+    
+    if(choice == 1){
+        if(!changeOrderQuantity(copy,findOrderIndexByID, productID, 0)){
+            free(copy);
+            return FALSE;
+        }
+    }
+
+    //Luu thay doi
+    char oldValuse[20];
+    sprint(oldValuse, "%d", productID);
+
+    //luu thay doi
+    if(!commitChange(copy,"DELETE_FOOD", orderID, productID, "-")){
+        printf("Delete order food compelete!");
+        return TRUE;
+    }
+}
