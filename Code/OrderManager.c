@@ -152,12 +152,6 @@ int createOrderTable(int type, int reservationID, int tableID, int guests, doubl
 
         // luu thay doi
         int newOrderID = c->orders[orderIndex].orderID;
-
-        if(!commitChange(c, "CREATE_ORDER", newOrderID, "-", "OPEN")){
-            printf("Cannot save order.\n");
-            return FALSE;
-        }
-
         printf("Create order successfully. Order ID: %d\n", newOrderID);
     }
     return TRUE;
@@ -248,11 +242,6 @@ int addOrderFood(int orderID, int productID, int quantity){
     sprintf(oldValue, "%d", oldQuantity);
     sprintf(newValue, "%d", newQuantity);
 
-    if(!commitChange(copy, "ADD_FOOD", orderID, oldValue, newValue)){
-        printf("Cannot save order food.\n");
-        return FALSE;
-    }
-
     printf("Add order food successfully.\n");
     return TRUE;
 }
@@ -298,11 +287,6 @@ int updateOrderFood(int orderID, int productID, int newQuantity){
     sprintf(newValue, "%d", newQuantity);
 
     // luu thay doi
-    if(!commitChange(copy, "UPDATE_FOOD", orderID, oldValue, newValue)){
-        printf("Cannot save updated order food.\n");
-        return FALSE;
-    }
-
     printf("Update order food successfully.\n");
     return TRUE;
 }
@@ -347,7 +331,7 @@ int deleteOrderFood(int orderID, int productID){
         printf("Invaild choose!");
         return FALSE;
     }
-    
+
     if(choice == 1){
         if(!changeOrderQuantity(copy,findOrderIndexByID, productID, 0)){
             free(copy);
@@ -358,10 +342,48 @@ int deleteOrderFood(int orderID, int productID){
     //Luu thay doi
     char oldValuse[20];
     sprint(oldValuse, "%d", productID);
+    return TRUE;
+}
 
-    //luu thay doi
-    if(!commitChange(copy,"DELETE_FOOD", orderID, productID, "-")){
-        printf("Delete order food compelete!");
-        return TRUE;
+void listPreOrderedDishes(int tableID){
+
+    showAllOrderTable(); 
+    //nhap de tim kiem table theo ID
+    printf("Enter ID of the table: ");
+    scanf("%d", &tableID);
+
+    int findTable = findTableByID(&S, tableID);
+    if(findTable == -1){
+        printf("Table not found!");
+        return;
     }
+    
+    // Duyet qua tat ca cac mon
+    int found = FALSE;
+    for(int i = 0; i < S.orderCount; i++){
+        Order *order = &S.orders[i];
+        if( order->tableID != tableID){
+            continue;
+        }
+        if( order->orderStatus != ORDER_OPEN || !order->isPreOrder){
+            continue;
+        }
+        int findReservationID = findReservationByID(&S, order->reservationID);
+        if(findReservationID != -1 && S.reservations[findReservationID].reservationStatus == WAITING && order->itemCount > 0){
+            printf("OrderID: %d\n", order->orderID);
+            printf("TableID: %d\n", order->tableID);
+            printf("Time Booking: %d/%d/%d %d:%d\n",
+                   S.reservations[findReservationID].timeBooking.day,
+                   S.reservations[findReservationID].timeBooking.month,
+                   S.reservations[findReservationID].timeBooking.year,
+                   S.reservations[findReservationID].timeBooking.hour,
+                   S.reservations[findReservationID].timeBooking.minute);
+
+        showAllOrderFood(order);
+        found == TRUE;
+    }
+        if(found == FALSE){
+            printf("No pre ordered this dishes for this table");
+            }
+        }
 }
