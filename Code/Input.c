@@ -45,4 +45,3 @@ int readInt(const char *prompt, int *value)
     *value = (int)v;
     return TRUE;
 }
-

@@ -40,6 +40,7 @@ void sortTableByStatus(Table *tables, int tableCount)
 {
     int i, j;
     Table temp;
+    Table view[MAX_TABLES];
 
     for (i = 0; i < tableCount - 1; i++) {
         for (j = 0; j < tableCount - i - 1; j++) {
@@ -52,6 +53,7 @@ void sortTableByStatus(Table *tables, int tableCount)
             }
         }
     }
+    showTables(view, tableCount);
 }
 
 void updateStatusTable(Table *tables, int tableCount)
@@ -147,10 +149,6 @@ int updateStatusAutoTable(Table *tables, int tableCount, int tableID, int event)
         default:
             return FALSE;
     }
-    if (!allowed){
-        return FALSE;
-    }
-    tables[index].tableStatus = expected;
     return TRUE;                              
 }
 

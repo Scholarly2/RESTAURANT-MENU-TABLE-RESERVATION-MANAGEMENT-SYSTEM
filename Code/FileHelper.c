@@ -69,4 +69,3 @@ int saveProduct(const Product *list, int count)
 
 int saveTransaction(void) { return TRUE; }  
 int saveBillReport(void)  { return TRUE; }   
-
