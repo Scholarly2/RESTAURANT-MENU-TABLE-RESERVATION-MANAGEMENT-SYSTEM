@@ -11,7 +11,6 @@
 #include "ReservationManager.c"
 #include "TableManager.c"
 
-/* Chỉ định nghĩa một lần trong chương trình. */
 State S = {0};
 
 void productMenu(void);

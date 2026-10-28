@@ -165,8 +165,8 @@ int findReservationByID(const State *s, int id);
 int createReservation(const char *nameCustomer, const char *phoneNumber,
                       int NumberCustomer, DateTime timeBooking,
                       int tableType, int requestedTableID);
-int cancelReservation(int reservationID);
-int checkInReservation(int reservationID);
+int cancelReservation(const char* phoneNumber);
+int checkInReservation(const char* phoneNumber);
 void sortBookingByTime(void);
 
 //function order va quan li ton kho
