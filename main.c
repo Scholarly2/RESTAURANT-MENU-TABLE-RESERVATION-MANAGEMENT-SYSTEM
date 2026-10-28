@@ -11,12 +11,18 @@
 #include "ReservationManager.c"
 #include "TableManager.c"
 
+#include "products.txt"
+#include "Account.dat"
+#include "OrderHistory.txt"
+
+
 State S = {0};
 
 void productMenu(void);
 void tableMenu(void);
 void reservationMenu(void);
 void orderMenu(void);
+void printMenuByRole(int role);
 
 int main(void)
 {

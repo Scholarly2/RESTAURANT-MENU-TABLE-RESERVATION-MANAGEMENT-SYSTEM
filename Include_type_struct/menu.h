@@ -24,16 +24,14 @@ static inline void showModuleMenu(int module)
     for (;;) {
         switch (module) {
         case 1:
-            puts("\n=== PRODUCT MANAGEMENT ===");
-            puts("1. Add product");
-            puts("2. Update product (name, price, type, quantity, status)");
-            puts("3. Delete product by name");
-            puts("4. Search products by name");
-            puts("5. Search products by type");
-            puts("6. Sort by price");
-            puts("7. Sort by name");
-            puts("8. Display menu items");
-            maxChoice = 8;
+            printf("\n=== PRODUCT MANAGEMENT ===");
+            printf("1. Add product");
+            printf("2. Update product menu");
+            printf("3. Delete product by name");
+            printf("4. Search products and sort products menu");
+            printf("5. Show menu items");
+            printf("0. Go back");
+            maxChoice = 5;
             break;
         case 2:
             puts("\n=== TABLE MANAGEMENT ===");

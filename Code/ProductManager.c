@@ -642,7 +642,7 @@ int searchProductMenu(void)
             break;
 
         case 0: break;
-        
+
         }
     } while (choice != 0);
     return TRUE;
@@ -673,18 +673,22 @@ void productMenu(void)
         return;
     }
     do {
-        puts("\n=== PRODUCT MANAGEMENT ===");
-        puts("1. Show product list\n2. Add product\n3. Update product");
-        puts("4. Delete product\n5. Search product\n0. Back to main menu");
-        if (!readInt("Choose: ", 0, 5, &choice)) return;
+            printf("\n=== PRODUCT MANAGEMENT ===");
+            printf("1. Add product");
+            printf("2. Update product menu");
+            printf("3. Delete product by name");
+            printf("4. Search products menu");
+            printf("5. Show menu items");
+            printf("0. Go back");
+        if (!readInt("Choose: ", 0, 8, &choice)) return;
         switch (choice) {
-        case 1: if (!showProductListMenu()) return; break;
-        case 2: addProduct(); break;
-        case 3: updateProduct(); break;
-        case 4: deleteProduct(); break;
-        case 5: if (!searchProductMenu()) return; break;
+        case 1: addProduct(); break;
+        case 2: updateProduct(); break;
+        case 3: deleteProduct(); break;
+        case 4: searchProductMenu(); break;
+        case 5: if (!showProductListMenu()) return; break;
         case 0: break;
-        }
+        } 
         if (feof(stdin) || ferror(stdin)) return;
     } while (choice != 0);
 }
