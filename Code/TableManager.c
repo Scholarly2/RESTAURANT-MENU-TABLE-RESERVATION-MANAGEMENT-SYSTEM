@@ -153,11 +153,21 @@ int findAvailableTable(const Table *tables, int tableCount, int numberCustomer)
     int bestIndex = -1;
     int i;
 
-    if (numberCustomer <= 0)      return -1;
-    else if (numberCustomer <= 2) needType = 2;
-    else if (numberCustomer <= 4) needType = 4;
-    else if (numberCustomer <= 8) needType = 8;
-    else                          return -1;  
+    if (numberCustomer <= 0){
+        return -1;
+    }     
+    else if (numberCustomer <= 2){
+        needType = 2;
+    }
+    else if (numberCustomer <= 4){
+        needType = 4;
+    } 
+    else if (numberCustomer <= 8){
+        needType = 8;
+    } 
+    else{
+        return -1; 
+    }                          
 
     for (i = 0; i < tableCount; i++) {
         if (tables[i].tableStatus == AVAILABLE && tables[i].tableType >= needType) {
@@ -172,4 +182,3 @@ int findAvailableTable(const Table *tables, int tableCount, int numberCustomer)
     }        
     return tables[bestIndex].tableID;
 }
-
