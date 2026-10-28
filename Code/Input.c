@@ -12,14 +12,14 @@ int isValidNumber(const char *str)
 {
     int i = 0;
 
-    if (str == NULL || str[0] == '\0') return 0;
+    if (str == NULL || str[0] == '\0') return FALSE;
     if (str[0] == '-' || str[0] == '+') i++;
-    if (str[i] == '\0') return 0;
+    if (str[i] == '\0') return FALSE;
 
     for (; str[i] != '\0'; i++) {
-        if (!isdigit((unsigned char)str[i])) return 0;
+        if (!isdigit((unsigned char)str[i])) return FALSE;
     }
-    return 1;
+    return TRUE;
 }
 
 int readInt(const char *prompt, int *value)
@@ -36,13 +36,13 @@ int readInt(const char *prompt, int *value)
     }
     buf[strcspn(buf, "\r\n")] = '\0';
 
-    if (!isValidNumber(buf)) return 0;
+    if (!isValidNumber(buf)) return FALSE;
 
     errno = 0;
     v = strtol(buf, NULL, 10);
-    if (errno == ERANGE || v > INT_MAX || v < INT_MIN) return 0;
+    if (errno == ERANGE || v > INT_MAX || v < INT_MIN) return FALSE;
 
     *value = (int)v;
-    return 1;
+    return TRUE;
 }
 

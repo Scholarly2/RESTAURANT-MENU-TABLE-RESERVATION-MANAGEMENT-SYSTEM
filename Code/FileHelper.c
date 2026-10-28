@@ -15,7 +15,7 @@ int loadProduct(Product *list, int *count)
     f = fopen(PRODUCT_FILE, "r");
     if (f == NULL) {
         printf("File not found, start with an empty menu\n");
-        return 0;
+        return FALSE;
     }
 
     while (*count < MAX_PRODUCT && fgets(line, sizeof(line), f) != NULL) {
@@ -29,10 +29,10 @@ int loadProduct(Product *list, int *count)
         if (item.status != 1 && item.status != 2) continue;
         if (item.quantity < 0) continue;
 
-        isDuplicate = 0;
+        isDuplicate = FALSE;
         for (i = 0; i < *count; i++) {
             if (strcmp(list[i].productID, item.productID) == 0) {
-                isDuplicate = 1;
+                isDuplicate = TRUE;
                 break;
             }
         }
@@ -44,7 +44,7 @@ int loadProduct(Product *list, int *count)
 
     fclose(f);
     printf("Loaded %d products\n", *count);
-    return 1;
+    return TRUE;
 }
 
 int saveProduct(const Product *list, int count)
@@ -54,7 +54,7 @@ int saveProduct(const Product *list, int count)
 
     if (f == NULL) {
         printf("Error: cannot open file to save\n");
-        return 0;
+        return FALSE;
     }
 
     for (i = 0; i < count; i++) {
@@ -64,9 +64,9 @@ int saveProduct(const Product *list, int count)
     }
 
     fclose(f);
-    return 1;
+    return TRUE;
 }
 
-int saveTransaction(void) { return 1; }  
-int saveBillReport(void)  { return 1; }   
+int saveTransaction(void) { return TRUE; }  
+int saveBillReport(void)  { return TRUE; }   
 

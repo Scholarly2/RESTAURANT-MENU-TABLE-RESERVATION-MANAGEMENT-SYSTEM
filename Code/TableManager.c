@@ -71,7 +71,7 @@ void updateStatusTable(Table *tables, int tableCount)
 
     do {
         r = readInt("Enter table number (0 to quit): ", &tableNumber);
-        if (r == -1) return;
+        if (r == -1) return FALSE;
         if (r == 0 || tableNumber < 0) {
             printf("Error: please enter a valid number!\n");
             r = 0;
@@ -110,41 +110,48 @@ void updateStatusTable(Table *tables, int tableCount)
 
 int updateStatusAutoTable(Table *tables, int tableCount, int tableID, int event)
 {
+    if (tables == NULL) {
+        return FALSE;
+    }
+
     int index = findTableIndexByID(tables, tableCount, tableID);
 
-    if (index == -1) return 0;              
+    if (index == -1) return FALSE;              
 
     switch (event) {
         case BOOK:
             if (tables[index].tableStatus == AVAILABLE)
                 tables[index].tableStatus = BOOKED;
             else
-                return 0;
+                return FALSE;
             break;
         case CANCEL:
             if (tables[index].tableStatus == BOOKED)
                 tables[index].tableStatus = AVAILABLE;
             else
-                return 0;
+                return FALSE;
             break;
         case CHECK_IN:
             if (tables[index].tableStatus == BOOKED
                 || tables[index].tableStatus == AVAILABLE)
                 tables[index].tableStatus = SERVING;
             else
-                return 0;
+                return FALSE;
             break;
         case PAY_BILL:
             if (tables[index].tableStatus == SERVING)
                 tables[index].tableStatus = AVAILABLE;
             else
-                return 0;
+                return FALSE;
             break;
         default:
-            return 0;
+            return FALSE;
     }
-
-    return 1;                              
+    if (!allowed){
+        return FALSE;
+    }
+    tables[index].tableStatus = expected;
+    return TRUE;                              
 }
 
 int findAvailableTable(const Table *tables, int tableCount, int numberCustomer)
