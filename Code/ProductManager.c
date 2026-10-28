@@ -7,6 +7,9 @@
 
 #include "RestaurantTypes.h"
 #include "Input.h"
+#include "FileHelper.h"
+#include "FileHelper.c"
+
 //phu
 
 int generateProductID(const State *s)
@@ -127,19 +130,21 @@ int addProduct(const char *name, int type, double price, int quantity   )
     c->productCount++;          
     c ->lastProductID = id;
 
-    if (!commitChange(c, "Add Product", id, "-", name)) {
-        printf("Failed to save! Full memory. Please try again.\n");
+    if (!saveProduct(c, PRODUCT_FILE)) {
+        printf("Failed to write product data to file.\n");
         free(c);
         return FALSE;
     }
+
+    S = *c;
+    free(c);
 
     printf("Product added successfully with ID: %d\n", id);
     return TRUE;
 }
 
-
-
 //update product
+
 
 //update product price
 //update product name
