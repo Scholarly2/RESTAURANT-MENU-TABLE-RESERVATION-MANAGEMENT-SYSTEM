@@ -448,3 +448,48 @@ void showAllOrderTable(void){
         printf("ItemCount: %d\n", S.orders[i].itemCount);
     }
 }
+
+int releaseOrderStock(State *s, int orderIndex){
+    // kiem tra order co hop le khong
+    if(orderIndex < 0 || orderIndex >= s->orderCount){
+        return FALSE;
+    }
+
+    Order *order = &s->orders[orderIndex];
+
+    // kiem tra order status co phai la ORDER_OPEN khong
+    if(order->orderStatus != ORDER_OPEN){
+        return FALSE;
+    }
+
+    // giai phong ton kho cho moi mon trong order
+    for(int i = 0; i < order->itemCount; i++){
+        OrderItem *item = &order->items[i];
+
+        int productIndex = findProductByID(s, item->productID);
+
+        if(productIndex == -1){
+            continue;
+        }
+
+        s->products[productIndex].quantity += item->quantity;
+    }
+
+    return TRUE;
+}
+
+int cancelOrder(int orderID){
+    // tim order bang ID
+    int findOrderIndexByID = findOrderByID(&S, orderID);
+    if(findOrderIndexByID == -1 || S.orders[findOrderIndexByID].orderStatus != ORDER_OPEN || findOrderIndexByID >= S.orderCount){
+        return FALSE;
+    }
+
+    // cancel order va giai phong ton kho
+    if(!releaseOrderStock(&S, findOrderIndexByID)){
+        return FALSE;
+    }
+
+    return TRUE;
+}
+
