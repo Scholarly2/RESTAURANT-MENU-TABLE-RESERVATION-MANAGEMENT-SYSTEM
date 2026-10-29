@@ -84,7 +84,3 @@ int applyDeliveryCharge(double distance, double baseFee, double perKm, double *f
     return TRUE;
 
 }
-
-
-
-

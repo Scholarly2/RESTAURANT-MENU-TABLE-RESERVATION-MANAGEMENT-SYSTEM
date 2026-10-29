@@ -6,9 +6,7 @@
 #include <math.h>
 #include <errno.h>
 #include <limits.h>
-
 #include "common.h"
-#include "Input.h"
 
 
 #define INPUT_BUFFER_SIZE 1256
