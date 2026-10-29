@@ -492,7 +492,7 @@ static int runReservationAction(int choice) {
     switch (choice)
     {
         case 1:
-            // Create reservation
+            // Create reservation//
             if (!readName("Customer name: ", TRUE, name) ||
                 !readPhone(phone) ||
                 !readInt("Number of guests (1-8): ", 1, 8, &guests) ||
@@ -518,7 +518,7 @@ static int runReservationAction(int choice) {
                 printf("Failed to cancel reservation!\n");
             return TRUE;
         case 3:
-            // Sort and print reservations
+            // Sort and print reservations//
             sortBookingByTime();
             printReservation(S.reservations, S.resCount);
             return TRUE;
@@ -541,7 +541,6 @@ if (!ok){
 }
 return TRUE;
 }
-
 /* ===================== NAVIGATION (3.28 / 3.29) ===================== */
 
 void showMainMenu(void)
