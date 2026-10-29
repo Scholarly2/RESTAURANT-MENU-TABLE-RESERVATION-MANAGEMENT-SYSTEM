@@ -2,6 +2,31 @@
 #include <math.h>
 #include <RestaurantTypes.h>
 
+int calculateOrderTotal(const Order *order, double *total){
+    //check cac gia tri nhap vao
+    if(total == NULL || order == NULL || order->itemCount < 0 || order->itemCount > MAX_ITEMS){
+        return FALSE;
+    }
+
+    //tinh tong tien cua order
+    double sum = 0;
+    for(int i = 0; i < order->itemCount; i++){
+        double itemTotal = order->items[i].productPrice * order->items[i].quantity;
+        if(!isfinite(itemTotal) || itemTotal < 0 || itemTotal > MAX_MONEY){
+            return FALSE;
+        }
+        sum += itemTotal;
+    }
+
+    //kiem tra gia tri sum
+    if(!isfinite(sum) || sum < 0 || sum > MAX_MONEY){
+        return FALSE;
+    }
+    
+    *total = sum;
+    return TRUE;
+    
+}
 int calculateServiceCharge(int orderType, double subtotal, ChargePolicy policy, double distance, double *fee){
     // kiem tra phi nhap vao
     if(fee == NULL || !isfinite(subtotal) || subtotal < 0 || subtotal > MAX_MONEY){
@@ -84,3 +109,4 @@ int applyDeliveryCharge(double distance, double baseFee, double perKm, double *f
     return TRUE;
 
 }
+
