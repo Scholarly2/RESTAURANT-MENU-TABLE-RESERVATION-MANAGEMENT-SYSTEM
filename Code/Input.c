@@ -266,3 +266,17 @@ void sortBookingByTime(void){
     }
     free(view);
 }
+int findReservationByID(const State*s,int id){
+    if (s==NULL||id <=0){
+        return -1;
+    }
+    for (int i=0;i<s->resCount;i++){
+        if (s->reservations[i].reservationID==id){
+        printf("Found reservation at index: %d\n", i);
+        return i;
+            printf("Found reservation at index: %d\n", i);
+        }
+    }
+        printf("Reservation with ID %d not found.\n", id);
+    return FALSE;
+}
