@@ -387,3 +387,12 @@ void listPreOrderedDishes(int tableID){
             }
         }
 }
+
+int findOrderByID(const State *s, int id){
+    //tim kiem bang ID
+    for(int i = 0; i < S.orderCount; i++){
+        if(S.orders[i].orderID == id){
+            return i;
+        }
+    }
+}
