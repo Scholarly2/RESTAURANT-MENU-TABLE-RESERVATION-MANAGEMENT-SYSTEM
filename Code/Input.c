@@ -208,3 +208,33 @@ int configureCharges(ChargePolicy policy){
 
     return TRUE;
 }
+
+int validateBill(const Bill *bill){
+
+    //kiem tra cac gia tri bill co hop le khong
+
+    if (bill == NULL){
+        return FALSE;
+    }
+
+    //kiem tra so luong item trong bill co hop le khong
+    if (bill->itemCount < 0 || bill->itemCount > MAX_ITEMS){
+        return FALSE;
+    }
+
+    //kiem tra gia tri tien trong bill co hop le hay khong
+    if (!isfinite(bill->totalMoney) || bill->totalMoney < 0 || bill->totalMoney > MAX_MONEY){
+        return FALSE;
+    }
+
+    //kiem tra gia tri tax trong bill co hop le khong
+    if (!isfinite(bill->taxRate) || bill->taxRate < 0 || bill->taxRate > 100){
+        return FALSE;
+    }
+
+    //kiem tra gia tri discount trong bill co hop le khong
+    if (!isfinite(bill->discountRate) || bill->discountRate < 0 || bill->discountRate > 100){
+        return FALSE;
+    }
+    return TRUE;
+}
