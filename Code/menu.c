@@ -480,26 +480,6 @@ static int runAction(int module, int choice)
         default: return TRUE;
     }
 }
-
-/* ===================== NAVIGATION (3.28 / 3.29) ===================== */
-
-void showMainMenu(void)
-{
-    int choice;
-    int count = ARRAY_SIZE(MAIN_ITEMS);
-
-    for (;;) {
-        printMenu("RESTAURANT MANAGEMENT SYSTEM", MAIN_ITEMS, count, "Exit");
-        if (!readInt(" >> Enter your choice: ", 0, count, &choice)) break;
-        if (choice == 0) break;
-        showModuleMenu(choice);
-    }
-
-    printf("\n");
-    printBorder('=');
-    printCentered("Thank you & goodbye!");
-    printBorder('=');
-}
 static int runReservationAction(int choice) {
     char phoneNumber[PHONE_SIZE];
     switch (choice) {
@@ -544,7 +524,7 @@ static int runReservationAction(int choice) {
             return TRUE;
         case 4:
             sortBookingByTime();
-            printReservation(S.reservations, S.resCount);
+            printReservation();
             return TRUE;
         case 4:
     if (!readPhone(phone))
@@ -560,6 +540,26 @@ if (!ok){
     printf("Reservation action rejected!\n");
 }
 return TRUE;
+}
+
+/* ===================== NAVIGATION (3.28 / 3.29) ===================== */
+
+void showMainMenu(void)
+{
+    int choice;
+    int count = ARRAY_SIZE(MAIN_ITEMS);
+
+    for (;;) {
+        printMenu("RESTAURANT MANAGEMENT SYSTEM", MAIN_ITEMS, count, "Exit");
+        if (!readInt(" >> Enter your choice: ", 0, count, &choice)) break;
+        if (choice == 0) break;
+        showModuleMenu(choice);
+    }
+
+    printf("\n");
+    printBorder('=');
+    printCentered("Thank you & goodbye!");
+    printBorder('=');
 }
 void showModuleMenu(int module)
 {
