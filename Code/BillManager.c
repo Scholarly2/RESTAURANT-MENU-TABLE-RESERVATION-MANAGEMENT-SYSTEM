@@ -42,4 +42,23 @@ int applyDineInCharge(double subtotal, double rate, double *fee){
     return TRUE;
 }
 
+int applyTakeawayCharge(double subtotal, double rate, double *fee){
+
+    //check cac gia tri phi, gia phu co sai hay khong
+    if(fee == NULL || !isfinite(subtotal) || subtotal < 0 || subtotal > MAX_MONEY){
+        return FALSE;
+    }
+
+    //kiem tra rate truoc khi bat dau tinh toan
+    if(!isfinite(rate) < 0 || rate > 100){
+        return FALSE;
+    }
+
+    //tinh phi sau do lam tron den gia tien gan nhat
+    *fee = roundMoney(subtotal *rate / 100);
+    return TRUE;
+}
+
+
+
 
