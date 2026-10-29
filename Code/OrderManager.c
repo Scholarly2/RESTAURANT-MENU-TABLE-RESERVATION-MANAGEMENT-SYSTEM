@@ -422,3 +422,29 @@ int findOpenOrder(const State *s, int tableID, int reservationID){
             return FALSE;
         }
 }
+
+void showAllOrderFood(const Order *order){
+    //hien thi tat ca cac mon trong order;
+    for(int i = 0; i < order->itemCount; i++){
+        printf("ProductID: %d\n", order->items[i].productID);
+        printf("ProductName: %s\n", order->items[i].productName);
+        printf("ProductType: %d\n", order->items[i].productType);
+        printf("ProductPrice: %.2f\n", order->items[i].productPrice);
+        printf("Quantity: %d\n", order->items[i].quantity);
+    }
+}
+
+void showAllOrderTable(void){
+    // hien thi tat ca cac order cua ban
+    for(int i = 0; i < S.orderCount; i++){
+        printf("OrderID: %d\n", S.orders[i].orderID);
+        printf("TableID: %d\n", S.orders[i].tableID);
+        printf("ReservationID: %d\n", S.orders[i].reservationID);
+        printf("OrderType: %d\n", S.orders[i].orderType);
+        printf("IsPreOrder: %d\n", S.orders[i].isPreOrder);
+        printf("NumberCustomer: %d\n", S.orders[i].NumberCustomer);
+        printf("DeliveryDistance: %.2f\n", S.orders[i].deliveryDistance);
+        printf("OrderStatus: %d\n", S.orders[i].orderStatus);
+        printf("ItemCount: %d\n", S.orders[i].itemCount);
+    }
+}
