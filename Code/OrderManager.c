@@ -394,5 +394,12 @@ int findOrderByID(const State *s, int id){
         if(S.orders[i].orderID == id){
             return i;
         }
+        else{
+            return FALSE;
+        }
     }
+}
+
+int findOrderItem(const Order *order, int productID){
+
 }
