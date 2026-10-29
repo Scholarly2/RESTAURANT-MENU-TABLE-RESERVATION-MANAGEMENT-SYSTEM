@@ -11,7 +11,6 @@ int runProductAction(int choice);
 int runTableAction(int choice);
 int runReservationAction(int choice);
 int runOrderAction(int choice);
-
 static inline void showModuleMenu(int module)
 {
     int choice;
