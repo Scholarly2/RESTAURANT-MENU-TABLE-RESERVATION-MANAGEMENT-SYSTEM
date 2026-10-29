@@ -585,7 +585,7 @@ int saveBillReport(const State *s, const char *path)
             b->itemCount < 0 || b->itemCount > MAX_ITEMS) return FALSE;
     }
 
-    file = fopen(path, "w");
+    file = fopen(path, "a");
     if (file == NULL) return FALSE;
 
     if (fprintf(file, "BILL|2|%d|%d\n", s->billCount, s->lastBillID) < 0)
