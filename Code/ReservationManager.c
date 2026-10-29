@@ -204,14 +204,6 @@ int CheckInReservation(const char*phoneNumber){
     return TRUE;
 }
 int cancelReservation(const char *phoneNumber) {
-    // check numberphone 
-    if (!isValidPhone(phoneNumber)) {
-        printf("Invalid phone number provided for cancellation: %s\n", phoneNumber);
-        return FALSE;
-    }
-    // find waiting reservation by phone
-
-int cancelReservation(const char *phoneNumber) {
     //Check phone number
     if (!isValidPhone(phoneNumber)) {
         printf("Invalid phone number!\n");
