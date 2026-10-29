@@ -107,4 +107,63 @@ int isValidBookingTime(DateTime t){
         return FALSE;
     }
     return TRUE;
+}
+int toTimestamp(DateTime t,time_t*result){
+    if (result==NULL){
+        return FALSE;
+    }
+    if (t.year < 2000 || t.year > 2100 ||
+        t.month < 1 || t.month > 12 ||
+        t.day < 1 || t.day > 31 ||
+        t.hour < 0 || t.hour > 23 ||
+        t.minute < 0 || t.minute > 59) {
+            return FALSE;
+    }
+    struct tm x = {0};
+    x.tm_year = t.year - 1900;
+    x.tm_mon = t.month - 1;
+    x.tm_mday = t.day;
+    x.tm_hour = t.hour;
+    x.tm_min = t.minute;
+    time_t when = mktime(&x);
+    if (when == -1) {
+        return FALSE;
+    }
+    if (x.tm_year != t.year - 1900 || x.tm_mon != t.month - 1 ||
+        x.tm_mday != t.day || x.tm_hour != t.hour || x.tm_min != t.minute) {
+        return FALSE;
+    }
+    *result = when;
+    return TRUE;
+}
+void sortBookingByTime(void){
+    if (S.resCount <= 0) {
+        return;
+    }
+    Reservation *view = malloc((size_t)S.resCount * sizeof(Reservation));
+    if (view == NULL) {
+        return;
+    }
+    for (int i = 0; i < S.resCount; i++) {
+        view[i] = S.reservations[i];
+    }
+    for (int i = 0; i < S.resCount - 1; i++) {
+        int minIndex;
+        minIndex = i;
+        for (int j = i + 1; j < S.resCount; j++) {
+            int d = compareDateTime(view[j].timeBooking, view[minIndex].timeBooking);
+            if (d < 0 || (d == 0 && view[j].reservationID < view[minIndex].reservationID)) {
+                minIndex = j;
+            }
+        }
+        if (minIndex != i) {
+            Reservation temp = view[i];
+            view[i] = view[minIndex];
+            view[minIndex] = temp;
+        }
+    }
+    for (int i = 0; i < S.resCount; i++) {
+        S.reservations[i] = view[i];
+    }
+    free(view);
 }   
