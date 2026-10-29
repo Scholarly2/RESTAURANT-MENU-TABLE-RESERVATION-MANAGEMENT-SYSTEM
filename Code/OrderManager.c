@@ -380,7 +380,7 @@ void listPreOrderedDishes(int tableID){
                    S.reservations[findReservationID].timeBooking.minute);
 
         showAllOrderFood(order);
-        found == TRUE;
+        found = TRUE;
     }
         if(found == FALSE){
             printf("No pre ordered this dishes for this table");
@@ -490,6 +490,36 @@ int cancelOrder(int orderID){
         return FALSE;
     }
 
+    return TRUE;
+}
+
+int checkoutOrder(int orderID, double discountRate, double taxRate){
+
+    //tim kiem order bang ID
+    int findOrderIndexByID = findOrderByID(&S, orderID);
+    if(findOrderIndexByID == -1 || S.orders[findOrderIndexByID].orderStatus != ORDER_OPEN || findOrderIndexByID >= S.orderCount){
+        return FALSE;
+    }
+
+    //kiem tra discount va tax co hop le khong
+    if(!isfinite(discountRate) || !isfinite(taxRate) || discountRate < 0 || discountRate > 100 || taxRate < 0 || taxRate > 100){
+        return FALSE;
+    }
+
+    //tinh hoa don
+    Bill bill;
+    if(!calculateBill(&S.orders[findOrderIndexByID], S.policy, discountRate, taxRate, &bill)){
+        return FALSE;
+    }
+
+    //luu hoa don vao bo nho
+    if(S.billCount >= MAX_BILLS){
+        return FALSE;
+    }
+    S.bills[S.billCount] = bill;
+    S.billCount++;
+    // cap nhat trang thai order thanh ORDER_PAID
+    S.orders[findOrderIndexByID].orderStatus = ORDER_PAID;
     return TRUE;
 }
 
