@@ -411,3 +411,14 @@ int findOrderItem(const Order *order, int productID){
         }
     }
 }
+
+int findOpenOrder(const State *s, int tableID, int reservationID){
+    //tim order bang tableID va reservationID
+    for(int i = 0; i < S.orderCount; i++){
+        if(S.orders[i].tableID == tableID && S.orders[i].reservationID == reservationID && S.orders[i].orderStatus == ORDER_OPEN){
+            return i;
+        }
+        else{
+            return FALSE;
+        }
+}

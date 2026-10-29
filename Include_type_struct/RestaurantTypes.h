@@ -187,8 +187,8 @@ void printReservation(void); //done
 
 //function order va quan li ton kho
 int findOrderByID(const State *s, int id); //done
-int findOrderItem(const Order *order, int productID); // not done
-int findOpenOrder(const State *s, int tableID, int reservationID); // not done
+int findOrderItem(const Order *order, int productID); //done
+int findOpenOrder(const State *s, int tableID, int reservationID); //done
 int createOrderTable(int type, int reservationID, int tableID, int guests, double distance); //done
 int changeOrderQuantity(State *s, int orderIndex, int productID, int newQuantity); // done
 int addOrderFood(int orderID, int productID, int quantity); // done
