@@ -175,7 +175,7 @@ void showTables(const Table *list, int count); //done
 void sortTableByStatus(void); //done
 
 //function reservation
-int findReservationByID(const State *s, int id); // not done
+int findReservationByID(const State *s, int id); //done
 int createReservation(const char *nameCustomer, const char *phoneNumber,
                       int NumberCustomer, DateTime timeBooking,
                       int tableType, int requestedTableID); //done
