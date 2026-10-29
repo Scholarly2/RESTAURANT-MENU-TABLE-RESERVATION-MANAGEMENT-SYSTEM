@@ -480,7 +480,67 @@ static int runAction(int module, int choice)
         default: return TRUE;
     }
 }
+static int runReservationAction(int choice) {
+    char phoneNumber[PHONE_SIZE];
+    switch (choice) {
+ char name[CUSTOMER_NAME_SIZE];
+    char phone[PHONE_SIZE];
+    DateTime time;
+    int guests, neededType;
+    int id, confirm;
+    int ok = TRUE;
+    switch (choice)
+    {
+        case 1:
+            // Create reservation//
+            if (!readName("Customer name: ", TRUE, name) ||
+                !readPhone(phone) ||
+                !readInt("Number of guests (1-8): ", 1, 8, &guests) ||
+                !readBookingTime(&time))
+            {
+                return FALSE;
+            }
+            if (guests <= 2)
+                neededType = 2;
+            else if (guests <= 4)
+                neededType = 4;
+            else
+                neededType = 8;
 
+            ok = createReservation(name, phone, guests,
+                     time, neededType, 0);
+            break;
+        }
+        case 2:
+            if (!readPhone(phoneNumber))
+                return FALSE;
+            if (!cancelReservation(phoneNumber))
+                printf("Failed to cancel reservation!\n");
+            return TRUE;
+        case 3:
+            // Sort and print reservations//
+            sortBookingByTime();
+            printReservation(S.reservations, S.resCount);
+            return TRUE;
+        case 4:
+            sortBookingByTime();
+            printReservation();
+            return TRUE;
+        case 4:
+    if (!readPhone(phone))
+    {
+        return FALSE;
+    }
+    ok = CheckInReservation(phone);
+    break;
+        default:
+            return TRUE;
+}
+if (!ok){
+    printf("Reservation action rejected!\n");
+}
+return TRUE;
+}
 /* ===================== NAVIGATION (3.28 / 3.29) ===================== */
 
 void showMainMenu(void)
@@ -500,7 +560,6 @@ void showMainMenu(void)
     printCentered("Thank you & goodbye!");
     printBorder('=');
 }
-
 void showModuleMenu(int module)
 {
     const char        *title;

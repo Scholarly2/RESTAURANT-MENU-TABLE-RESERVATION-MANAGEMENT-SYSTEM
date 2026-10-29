@@ -273,35 +273,45 @@ int findReservationByID(const State *s, int id){
     }
     return -1;
 }
-void sortBookingByTime(void){
-    if (S.resCount <= 0) {
-        return;
-    }
-    Reservation *view = malloc((size_t)S.resCount * sizeof(Reservation));
-    if (view == NULL) {
-        return;
-    }
-    for (int i = 0; i < S.resCount; i++) {
-        view[i] = S.reservations[i];
-    }
-    for (int i = 0; i < S.resCount - 1; i++) {
-        int minIndex;
-        minIndex = i;
-        for (int j = i + 1; j < S.resCount; j++) {
-            int d = compareDateTime(view[j].timeBooking, view[minIndex].timeBooking);
-            if (d < 0 || (d == 0 && view[j].reservationID < view[minIndex].reservationID)) {
-                minIndex = j;
-            }
-        }
-        if (minIndex != i) {
-            Reservation temp = view[i];
-            view[i] = view[minIndex];
-            view[minIndex] = temp;
-        }
-    }
-    for (int i = 0; i < S.resCount; i++) {
-        S.reservations[i] = view[i];
-    }
-    free(view);
-}
 
+void printReservation(void){
+    int i;
+    if (S.resCount <= 0)
+    {
+        printf("No reservations found!\n");
+        return;
+    }
+    // Print table header//
+    printf("\n%-5s %-20s %-15s %-6s %-16s %-7s %-10s\n",
+           "ID", "Customer", "Phone", "Guests",
+           "Booking Time", "Table", "Status");
+    printf("-------------------------------------------------------------------------------------\n");
+    for (i = 0; i < S.resCount; i++)
+    {
+        const Reservation *r = &S.reservations[i];
+        const char *status;
+        //Check reservation status//
+        if (r->reservationStatus == WAITING)
+            status = "WAITING";
+        else if (r->reservationStatus == COMPLETED)
+            status = "COMPLETED";
+        else if (r->reservationStatus == CANCELLED)
+            status = "CANCELLED";
+        else
+            status = "UNKNOWN";
+
+        // Print reservation information
+        printf("%-5d %-20.20s %-15.15s %-6d %02d/%02d/%04d %02d:%02d %-7d %-10s\n",
+               r->reservationID,
+               r->nameCustomer,
+               r->phoneNumber,
+               r->NumberCustomer,
+               r->timeBooking.day,
+               r->timeBooking.month,
+               r->timeBooking.year,
+               r->timeBooking.hour,
+               r->timeBooking.minute,
+               r->tableID,
+               status);
+    }
+}

@@ -38,6 +38,7 @@ enum OrderType { DINE_IN = 1, TAKEAWAY, DELIVERY };
 enum ReservationStatus { WAITING = 0, COMPLETED, CANCELLED };
 enum OrderStatus { ORDER_OPEN = 0, ORDER_PAID, ORDER_CANCELLED };
 enum TableEvent { BOOK = 1, CANCEL, CHECK_IN, PAY_BILL, CANCEL_ORDER };
+enum BillStatus { BILL_UNPAID = 0, BILL_PAID };
 
 //time booking and bill
 typedef struct {
@@ -182,6 +183,7 @@ int createReservation(const char *nameCustomer, const char *phoneNumber,
 int cancelReservation(const char* phoneNumber); //done 
 int checkInReservation(const char* phoneNumber); //change reservationID -> phoneNumber //done
 void sortBookingByTime(void); //done
+void printReservation(void);
 
 //function order va quan li ton kho
 int findOrderByID(const State *s, int id); // not done
