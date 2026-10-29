@@ -182,6 +182,7 @@ int createReservation(const char *nameCustomer, const char *phoneNumber,
 int cancelReservation(const char* phoneNumber); //done 
 int checkInReservation(const char* phoneNumber); //change reservationID -> phoneNumber //done
 void sortBookingByTime(void); // not done
+void printReservation(void);
 
 //function order va quan li ton kho
 int findOrderByID(const State *s, int id); // not done
