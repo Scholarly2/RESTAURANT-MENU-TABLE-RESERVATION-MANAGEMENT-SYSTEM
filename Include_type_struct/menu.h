@@ -38,6 +38,7 @@ static inline void showModuleMenu(int module)
             puts("2. Change table status");
             puts("3. Find an available table by number of guests");
             puts("4. Sort tables by status");
+            puts("0. Go back");
             maxChoice = 4;
             break;
         case 3:
@@ -46,22 +47,22 @@ static inline void showModuleMenu(int module)
             puts("2. Cancel reservation");
             puts("3. Display reservations sorted by time");
             puts("4. Confirm guest check-in");
+            puts("0. Go back");
             maxChoice = 4;
             break;
         default: // module == 4
             puts("\n=== ORDERS AND BILLS ===");
-            puts("1. Create or select an order");
+            puts("1. Create an order");
             puts("2. Add an item to the order");
             puts("3. Update item quantity in the order");
             puts("4. Remove an item from the order");
-            puts("5. View pre-ordered items by table");
-            puts("6. View draft bill");
+            puts("5. View order items");
+            puts("6. View pre-ordered items by table");
             puts("7. Process payment and print bill");
             puts("8. Cancel order");
-            puts("9. View order list/history");
-            puts("10. Configure surcharges");
-            puts("11. View paid bills");
-            maxChoice = 11;
+            puts("9. Configure surcharges");
+            puts("0. Go back");
+            maxChoice = 9;
             break;
         }
 

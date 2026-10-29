@@ -2,6 +2,8 @@
 #include <RestaurantTypes.h>
 #include <stdlib.h>
 #include <math.h>
+#include "Input.c"
+#include <menu.h>
 
 int createOrderTable(int type, int reservationID, int tableID, int guests, double distance){
 
@@ -155,15 +157,6 @@ int createOrderTable(int type, int reservationID, int tableID, int guests, doubl
         printf("Create order successfully. Order ID: %d\n", newOrderID);
     }
     return TRUE;
-}
-
-int findOrderByID(const State*s, int id){
-    //tim kiem bang ID
-    for(int i = 0; i < s->orderCount; i++){
-        if(s->orders[i].orderID  == id)
-            return i;
-    }
-    return -1;
 }
 
 int addOrderFood(int orderID, int productID, int quantity){
@@ -493,33 +486,4 @@ int cancelOrder(int orderID){
     return TRUE;
 }
 
-int checkoutOrder(int orderID, double discountRate, double taxRate){
-
-    //tim kiem order bang ID
-    int findOrderIndexByID = findOrderByID(&S, orderID);
-    if(findOrderIndexByID == -1 || S.orders[findOrderIndexByID].orderStatus != ORDER_OPEN || findOrderIndexByID >= S.orderCount){
-        return FALSE;
-    }
-
-    //kiem tra discount va tax co hop le khong
-    if(!isfinite(discountRate) || !isfinite(taxRate) || discountRate < 0 || discountRate > 100 || taxRate < 0 || taxRate > 100){
-        return FALSE;
-    }
-
-    //tinh hoa don
-    Bill bill;
-    if(!calculateBill(&S.orders[findOrderIndexByID], S.policy, discountRate, taxRate, &bill)){
-        return FALSE;
-    }
-
-    //luu hoa don vao bo nho
-    if(S.billCount >= MAX_BILLS){
-        return FALSE;
-    }
-    S.bills[S.billCount] = bill;
-    S.billCount++;
-    // cap nhat trang thai order thanh ORDER_PAID
-    S.orders[findOrderIndexByID].orderStatus = ORDER_PAID;
-    return TRUE;
-}
 
