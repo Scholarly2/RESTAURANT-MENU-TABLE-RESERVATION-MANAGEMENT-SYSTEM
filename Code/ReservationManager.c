@@ -273,3 +273,35 @@ int findReservationByID(const State *s, int id){
     }
     return -1;
 }
+void sortBookingByTime(void){
+    if (S.resCount <= 0) {
+        return;
+    }
+    Reservation *view = malloc((size_t)S.resCount * sizeof(Reservation));
+    if (view == NULL) {
+        return;
+    }
+    for (int i = 0; i < S.resCount; i++) {
+        view[i] = S.reservations[i];
+    }
+    for (int i = 0; i < S.resCount - 1; i++) {
+        int minIndex;
+        minIndex = i;
+        for (int j = i + 1; j < S.resCount; j++) {
+            int d = compareDateTime(view[j].timeBooking, view[minIndex].timeBooking);
+            if (d < 0 || (d == 0 && view[j].reservationID < view[minIndex].reservationID)) {
+                minIndex = j;
+            }
+        }
+        if (minIndex != i) {
+            Reservation temp = view[i];
+            view[i] = view[minIndex];
+            view[minIndex] = temp;
+        }
+    }
+    for (int i = 0; i < S.resCount; i++) {
+        S.reservations[i] = view[i];
+    }
+    free(view);
+}
+

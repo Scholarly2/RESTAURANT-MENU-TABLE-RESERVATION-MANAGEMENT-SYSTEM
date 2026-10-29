@@ -507,3 +507,20 @@ int readInt(const char *prompt, int *value)
     *value = (int)v;
     return TRUE;
 }
+
+int isValidBookingTime(DateTime t){
+    DateTime now;
+    getCurrentDateTime(&now);
+    if (compareDateTime(t, now) < 0) {
+        return FALSE;
+    }
+    time_t bookingTimestamp, nowTimestamp;
+    if (!toTimestamp(t, &bookingTimestamp) || !toTimestamp(now, &nowTimestamp)) {
+        return FALSE;
+    }
+    double diffMinutes = difftime(bookingTimestamp, nowTimestamp) / 60.0;
+    if (diffMinutes < CHECKIN_EARLY_MIN) {
+        return FALSE;
+    }
+    return TRUE;
+}

@@ -181,7 +181,7 @@ int createReservation(const char *nameCustomer, const char *phoneNumber,
                       int tableType, int requestedTableID); //done
 int cancelReservation(const char* phoneNumber); //done 
 int checkInReservation(const char* phoneNumber); //change reservationID -> phoneNumber //done
-void sortBookingByTime(void); // not done
+void sortBookingByTime(void); //done
 
 //function order va quan li ton kho
 int findOrderByID(const State *s, int id); // not done
