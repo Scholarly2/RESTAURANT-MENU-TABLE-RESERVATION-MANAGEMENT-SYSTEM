@@ -1,3 +1,9 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+#include <RestaurantTypes.h>
+#include <string.h>
+
 int createReservation(const char *nameCustomer, const char *phoneNumber, int NumberCustomer, DateTime timeBooking, int tableType, int requestedTableID) {
         // check array Maxreservation max already?
     if (S.resCount >= MAX_RESERVATIONS) {
@@ -256,4 +262,14 @@ int cancelReservation(const char *phoneNumber) {
     free(c);
     printf("Reservation cancelled successfully!\n");
     return TRUE;
+}
+
+int findReservationByID(const State *s, int id){
+    //tim kiem bang ID
+    for(int i = 0; i < S.resCount; i++){
+        if(s->reservations[i].reservationID == id){
+            return i;
+        }
+    }
+    return -1;
 }
