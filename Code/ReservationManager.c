@@ -133,7 +133,7 @@ int CheckInReservation(const char*phoneNumber){
         printf("Too early to check in!\n");
         return FALSE;
     }
-    check table status
+    // check table status
     int tableID = S.reservations[index].tableID;
     int t = findTableByID(&S, tableID);
 

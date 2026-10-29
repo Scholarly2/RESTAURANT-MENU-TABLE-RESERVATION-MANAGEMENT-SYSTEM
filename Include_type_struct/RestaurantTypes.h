@@ -17,6 +17,7 @@
 #define MAX_PRICE 1000000.0
 #define MAX_MONEY 1000000000000.0
 #define MAX_DISTANCE 1000.0
+#define CHECKIN_EARLY_MIN 30
 
 //enum
 enum ProductUPDATE
