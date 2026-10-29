@@ -171,7 +171,7 @@ int updateStatusAutoTable(State *s, int tableID, int event); //done
 int updateStatusTable(int tableID, int newStatus); //done
 int findAvailableTable(const State *s, int numberCustomer); //done  
 void showTables(const Table *list, int count); //done
-void sortTableByStatus(void); //d
+void sortTableByStatus(void); //done
 
 //function reservation
 int findReservationByID(const State *s, int id); // not done
