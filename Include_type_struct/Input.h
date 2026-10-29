@@ -15,6 +15,8 @@ int parseInt(const char *text, int min, int max, int *value);
 int parseDouble(const char *text, double min, double max, double *value);
 int readInt(const char *prompt, int min, int max, int *value);
 int readDouble(const char *prompt, double min, double max, double *value);
+//check input productname
+int isValidProductName(const char *name);
 
 // check input price and get.
 int isValidPrice(double price);
