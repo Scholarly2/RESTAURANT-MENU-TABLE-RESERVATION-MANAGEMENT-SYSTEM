@@ -1,3 +1,11 @@
+#include "RestaurantTypes.h"
+#include <stdio.h>
+#include <math.h>
+#include <time.h>
+#include <string.h>
+#include <stdlib.h>
+
+
 void getCurrentDateTime(DateTime*reasult){
     time_t now = time(NULL);
 	struct tm*t=localtime(&now);
@@ -183,4 +191,20 @@ void sortBookingByTime(void){
         S.reservations[i] = view[i];
     }
     free(view);
-}   
+}
+
+int configureCharges(ChargePolicy policy){
+    //kiem tra cac gia tri phi co hop le hay khong
+        if (!isfinite(policy.dineInRate) || !isfinite(policy.takeawayRate) || !isfinite(policy.deliveryBase) || !isfinite(policy.deliveryPerKm)) {
+        return FALSE;
+    }
+    // Kiem tra gia tri khong am
+    if (policy.dineInRate < 0 || policy.takeawayRate < 0 || policy.deliveryBase < 0 || policy.deliveryPerKm < 0) {
+        return FALSE;
+    }
+
+    //Luu gia tri phi vao bo nho
+    S.policy = policy;
+
+    return TRUE;
+}
