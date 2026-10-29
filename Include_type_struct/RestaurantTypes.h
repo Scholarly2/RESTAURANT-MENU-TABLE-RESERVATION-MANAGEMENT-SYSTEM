@@ -183,10 +183,10 @@ int createReservation(const char *nameCustomer, const char *phoneNumber,
 int cancelReservation(const char* phoneNumber); //done 
 int checkInReservation(const char* phoneNumber); //change reservationID -> phoneNumber //done
 void sortBookingByTime(void); //done
-void printReservation(void);
+void printReservation(void); //done
 
 //function order va quan li ton kho
-int findOrderByID(const State *s, int id); // not done
+int findOrderByID(const State *s, int id); //done
 int findOrderItem(const Order *order, int productID); // not done
 int findOpenOrder(const State *s, int tableID, int reservationID); // not done
 int createOrderTable(int type, int reservationID, int tableID, int guests, double distance); //done
