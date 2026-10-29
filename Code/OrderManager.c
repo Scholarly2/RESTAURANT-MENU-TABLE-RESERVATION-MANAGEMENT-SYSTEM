@@ -401,5 +401,13 @@ int findOrderByID(const State *s, int id){
 }
 
 int findOrderItem(const Order *order, int productID){
-
+    //tim kiem bang ID trong order
+    for(int i = 0; i , order->itemCount; i++){
+        if(order->items[i].productID == productID){
+            retuern i;
+        }
+        else{
+            return FALSE;
+        }
+    }
 }
