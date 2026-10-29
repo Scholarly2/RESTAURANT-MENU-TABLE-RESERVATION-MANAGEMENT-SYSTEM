@@ -11,4 +11,7 @@ int saveAllData(const State *s);
 int loadProducts(State *changing, const char *path);
 int saveProducts(const State *s, const char *path);
 
+//load voi save data bill
+int loadBillReport(State *chaning, const char *path);
+int saveBillReport(State *chaning, const char *path);
 #endif

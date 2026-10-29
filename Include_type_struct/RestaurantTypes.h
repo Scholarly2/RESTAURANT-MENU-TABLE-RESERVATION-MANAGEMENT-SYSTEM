@@ -145,75 +145,70 @@ int commitChange(State *candidate, const char *actionType, int targetID,
 
 
 //function pproduct
-int findProductByID(const State *s, int id);
-int generateProductID(const State *s);
-int addProduct(void);
-int updatePrice(MenuItem *item, double value);
-int updateName(MenuItem *item, const char *value);
-int updateType(MenuItem *item, int value);
-int updateQuantity(MenuItem *item, int value);
-int updateStatus(MenuItem *item, int value);
-int updateProduct(void); //change input function
-int deleteProduct(void);
-void searchProductByName(const char *keyword);
-void searchProductByType(int type);
-void sortByPrice(void);
-void sortByName(void);
-void printListProduct(const MenuItem *list, int count);
-void productMenu(void);
-void sortByID(void);
-void searchProductByID(int id);
+int findProductByID(const State *s, int id); // Done
+int generateProductID(const State *s); //Done
+int addProduct(void); //Done
+int updatePrice(MenuItem *item, double value); //Done
+int updateName(MenuItem *item, const char *value); //Done
+int updateType(MenuItem *item, int value); //done
+int updateQuantity(MenuItem *item, int value); //done
+int updateStatus(MenuItem *item, int value); //done
+int updateProduct(void); //change input function //done
+int deleteProduct(void); //done
+void searchProductByName(const char *keyword); //done 
+void searchProductByType(int type); //done
+void sortByPrice(void); //done
+void sortByName(void); //done
+void printListProduct(const MenuItem *list, int count); //done
+void productMenu(void); //done
+void sortByID(void); //done
+void searchProductByID(int id); //done
 
 //function table
-int findTableByID(const State *s, int id);
-int getExpectedTableStatus(const State *s, int tableID);
-int updateStatusAutoTable(State *s, int tableID, int event);
-int updateStatusTable(int tableID, int newStatus);
-int findAvailableTable(const State *s, int numberCustomer);
-void showTables(const Table *list, int count);
-void sortTableByStatus(void);
+int findTableByID(const State *s, int id); //done
+int getExpectedTableStatus(const State *s, int tableID); //done
+int updateStatusAutoTable(State *s, int tableID, int event); //done
+int updateStatusTable(int tableID, int newStatus); //done
+int findAvailableTable(const State *s, int numberCustomer); //done  
+void showTables(const Table *list, int count); //done
+void sortTableByStatus(void); //d
 
 //function reservation
-int findReservationByID(const State *s, int id);
+int findReservationByID(const State *s, int id); // not done
 int createReservation(const char *nameCustomer, const char *phoneNumber,
                       int NumberCustomer, DateTime timeBooking,
-                      int tableType, int requestedTableID);
-int cancelReservation(const char* phoneNumber);
-int checkInReservation(const char* phoneNumber); //change reservationID -> phoneNumber
-void sortBookingByTime(void);
+                      int tableType, int requestedTableID); //done
+int cancelReservation(const char* phoneNumber); //done 
+int checkInReservation(const char* phoneNumber); //change reservationID -> phoneNumber //done
+void sortBookingByTime(void); // not done
 
 //function order va quan li ton kho
-int findOrderByID(const State *s, int id);
-int findOrderItem(const Order *order, int productID);
-int findOpenOrder(const State *s, int tableID, int reservationID);
-int appendEmptyOrder(State *s, int type, int reservationID, int tableID,
-                     int guests, double distance);
-int createOrderTable(int type, int reservationID, int tableID, int guests, double distance);
-int heldQuantity(const State *s, int productID);
-int changeOrderQuantity(State *s, int orderIndex, int productID, int newQuantity);
-int addOrderFood(int orderID, int productID, int quantity);
-int updateOrderFood(int orderID, int productID, int newQuantity);
-int deleteOrderFood(int orderID, int productID);
-void showAllOrderFood(const Order *order);
-void showAllOrderTable(void);
-void listPreOrderedDishes(int tableID);
-int releaseOrderStock(State *s, int orderIndex);
-int cancelOrder(int orderID);
+int findOrderByID(const State *s, int id); // not done
+int findOrderItem(const Order *order, int productID); // not done
+int findOpenOrder(const State *s, int tableID, int reservationID); // not done
+int createOrderTable(int type, int reservationID, int tableID, int guests, double distance); //done
+int changeOrderQuantity(State *s, int orderIndex, int productID, int newQuantity); // done
+int addOrderFood(int orderID, int productID, int quantity); // done
+int updateOrderFood(int orderID, int productID, int newQuantity); //done
+int deleteOrderFood(int orderID, int productID); //done
+void showAllOrderFood(const Order *order); //not done
+void showAllOrderTable(void); // not done
+void listPreOrderedDishes(int tableID); //done
+int releaseOrderStock(State *s, int orderIndex); // not done
+int cancelOrder(int orderID); // not done
 
 //bill
-int calculateOrderTotal(const Order *order, double *total);
+int calculateOrderTotal(const Order *order, double *total); // not done
 int calculateServiceCharge(int orderType, double subtotal,
-                           ChargePolicy policy, double distance, double *fee);
-int applyDineInCharge(double subtotal, double rate, double *fee);
-int applyTakeawayCharge(double subtotal, double rate, double *fee);
-int applyDeliveryCharge(double distance, double baseFee, double perKm, double *fee);
-int configureCharges(ChargePolicy policy);
+                           ChargePolicy policy, double distance, double *fee); //done
+int applyDineInCharge(double subtotal, double rate, double *fee); //done
+int applyTakeawayCharge(double subtotal, double rate, double *fee); //done
+int applyDeliveryCharge(double distance, double baseFee, double perKm, double *fee); //done
+int configureCharges(ChargePolicy policy); //not done
 int calculateBill(const Order *order, ChargePolicy policy,
-                  double discountRate, double taxRate, Bill *bill);
-int validateBill(const Bill *bill);
-int printBillReport(int orderID, double discountRate, double taxRate);
-void displayBillReport(const Bill *bill);
-int checkoutOrder(int orderID, double discountRate, double taxRate);
+                  double discountRate, double taxRate, Bill *bill); //not done
+int validateBill(const Bill *bill); //not done
+int printBillReport(int orderID, double discountRate, double taxRate); // in processing
+int checkoutOrder(int orderID, double discountRate, double taxRate); //not done
 
 #endif
-
