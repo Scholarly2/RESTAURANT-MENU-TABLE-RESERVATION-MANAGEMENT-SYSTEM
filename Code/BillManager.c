@@ -22,7 +22,7 @@ int calculateOrderTotal(const Order *order, double *total){
     if(!isfinite(sum) || sum < 0 || sum > MAX_MONEY){
         return FALSE;
     }
-    
+
     *total = sum;
     return TRUE;
     
@@ -110,3 +110,38 @@ int applyDeliveryCharge(double distance, double baseFee, double perKm, double *f
 
 }
 
+int calculateBill(const Order *order, ChargePolicy policy, double discountRate, double taxRate, Bill *bill){
+    //check cac gia tri nhap vao
+    if(order == NULL || bill == NULL || !isfinite(discountRate) || !isfinite(taxRate) || discountRate < 0 || discountRate > 100 || taxRate < 0 || taxRate > 100){
+        return FALSE;
+    }
+
+    //tinh tong tien cua order
+    double subtotal;
+    if(!calculateOrderTotal(order, &subtotal)){ 
+        return FALSE;
+    }
+    //tinh phi dich vu
+    double serviceCharge;
+    if(!calculateServiceCharge(order->orderType, subtotal, policy, order->deliveryDistance, &serviceCharge)){
+        return FALSE;
+    }
+
+    //tinh discount va tax
+    double discount = roundMoney(subtotal * discountRate / 100);
+    double tax = roundMoney((subtotal - discount + serviceCharge) * taxRate / 100);
+
+    double total = subtotal - discount + serviceCharge + tax;
+    if (!isfinite(total) || total < 0 || total > MAX_MONEY) {
+    return FALSE;
+    }
+
+    //tinh tong tien cuoi cung
+    bill->subtotal = subtotal;
+    bill->serviceCharge = serviceCharge;
+    bill->discount = discount;
+    bill->tax = tax;
+    bill->total = total;
+
+    return TRUE;
+}
