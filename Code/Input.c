@@ -1,11 +1,129 @@
-#include <string.h>
-#include <time.h>
 #include <stdio.h>
-#include <limits.h>
 #include <stdlib.h>
+#include <string.h>
 #include <ctype.h>
-#define FALSE 0
+#include <math.h>
+#include <time.h>
+#include <errno.h>
+#include <limits.h>
 #define TRUE 1
+#define FALSE 0
+#define MAX_PRODUCT 100
+#define MAX_TABLES 100
+#define MAX_RESERVATIONS 1000
+#define MAX_ORDERS 1000
+#define MAX_BILLS 1000
+#define MAX_ITEMS 100
+#define NAME_SIZE 100     
+#define CUSTOMER_NAME_SIZE 50 
+#define PHONE_SIZE 15       
+#define TEXT_SIZE 256
+#define LINE_SIZE 2048
+#define ITEM_PER_PAGE 10
+#define MAX_QUANTITY 1000
+#define MAX_PRICE 1000000.0
+#define MAX_MONEY 1000000000000.0
+#define MAX_DISTANCE 1000.0
+#define MIN_PHONE_DIGITS 9
+#define MAX_PHONE_DIGITS 14
+#define CHECKIN_EARLY_MIN 30
+#define SCHEMA_VERSION 2
+#define CURRENT_FILE "CurrentState.txt"
+#define LOG_FILE "AuditLog.txt"
+enum ProductType {
+	STARTER = 1, MAINDISH, SIDEDISH, DESSERT, DRINK
+};
+enum ProductStatus { PRODUCT_AVAILABLE = 0, PRODUCT_UNAVAILABLE };
+enum TableStatus { TABLE_AVAILABLE = 0, TABLE_BOOKED, TABLE_SERVING };
+enum OrderType { DINE_IN = 1, TAKEAWAY, DELIVERY };
+enum ReservationStatus { WAITING = 0, COMPLETED, CANCELLED };
+enum OrderStatus { ORDER_OPEN = 0, ORDER_PAID, ORDER_CANCELLED };
+enum TableEvent { BOOK = 1, CANCEL, CHECK_IN, PAY_BILL, CANCEL_ORDER };
+ 
+typedef struct {
+	int year, month, day, hour, minute;
+} DateTime;
+typedef struct {
+	int productID;
+	char productName[NAME_SIZE];
+	double productPrice;
+	enum ProductType productType;
+	enum ProductStatus productStatus;
+	int quantity;
+} MenuItem;
+typedef struct {
+	int tableID;
+	int tableNumber;
+	int tableType;        
+	int tableTypeID;     	
+	enum TableStatus tableStatus;
+} Table;
+typedef struct {
+	int reservationID;
+	char nameCustomer[CUSTOMER_NAME_SIZE];
+	char phoneNumber[PHONE_SIZE];
+	int NumberCustomer;
+	DateTime timeBooking;
+	int tableType;
+	int tableID;  
+	enum ReservationStatus reservationStatus;
+} Reservation;
+typedef struct {
+	int productID;
+	char productName[NAME_SIZE];
+	enum ProductType productType;
+	double productPrice;
+	int quantity;
+} OrderItem;
+ 
+typedef struct {
+	int orderID, tableID, reservationID;
+	enum OrderType orderType;
+	int isPreOrder;
+	int NumberCustomer;
+	double deliveryDistance;
+	enum OrderStatus orderStatus;
+	int itemCount;
+	OrderItem items[MAX_ITEMS];
+} Order;
+typedef struct {
+	DateTime timestamp;
+	int staffID, targetID;
+	char actionType[30];
+	char oldValue[TEXT_SIZE], newValue[TEXT_SIZE];
+} AuditLog;
+typedef struct {
+	double dineInRate, takeawayRate;
+	double deliveryBase, deliveryPerKm;
+} ChargePolicy;
+typedef struct {
+	int billID, orderID, tableID, staffID;
+	enum OrderType orderType;
+	DateTime timeBill;
+	int itemCount;
+	OrderItem items[MAX_ITEMS];
+	double totalMoney;
+	double discountRate, discount;
+	double taxRate, tax;      
+	double surcharge;           
+	double amountDue;         	
+	ChargePolicy policySnapshot; 
+	double deliveryDistance;    
+} Bill;
+typedef struct {
+	MenuItem products[MAX_PRODUCT];
+	Table tables[MAX_TABLES];
+	Reservation reservations[MAX_RESERVATIONS];
+	Order orders[MAX_ORDERS];
+	Bill bills[MAX_BILLS];
+	int productCount, tableCount, resCount;
+	int orderCount, billCount;
+	int lastProductID, lastResID, lastOrderID, lastBillID;
+	ChargePolicy policy;
+} State;
+State S;
+int currentStaff;
+int currentGeneration = 0;
 int isValidPhone(const char*phoneNumber){
     const char*p=phoneNumber;
 	if(phoneNumber==NULL){
