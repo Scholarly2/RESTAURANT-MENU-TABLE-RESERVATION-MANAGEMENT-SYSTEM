@@ -1,3 +1,11 @@
+#include <string.h>
+#include <time.h>
+#include <stdio.h>
+#include <limits.h>
+#include <stdlib.h>
+#include <ctype.h>
+#define FALSE 0
+#define TRUE 1
 int isValidPhone(const char*phoneNumber){
     const char*p=phoneNumber;
 	if(phoneNumber==NULL){
