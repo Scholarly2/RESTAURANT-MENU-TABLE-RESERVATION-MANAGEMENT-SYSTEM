@@ -59,6 +59,32 @@ int applyTakeawayCharge(double subtotal, double rate, double *fee){
     return TRUE;
 }
 
+int applyDeliveryCharge(double distance, double baseFee, double perKm, double *fee){
+
+    //check cai gia tri
+    if(fee == NULL || !isfinite(distance) || distance < 0 || distance > MAX_DISTANCE){
+        return FALSE;
+    }
+
+    //tinh value theo km
+
+    if(!isfinite(baseFee) || !isfinite(distance) || baseFee < 0 || baseFee > MAX_MONEY || distance < 0 || distance > MAX_DISTANCE){
+        return FALSE;
+    }
+
+    double value = baseFee + distance * perKm;
+
+    //kiem tra gia tri value
+
+    if( !isfinite(value) || value > MAX_MONEY){
+        return  FALSE;
+    }
+
+    *fee = roundMoney(value);
+    return TRUE;
+
+}
+
 
 
 
