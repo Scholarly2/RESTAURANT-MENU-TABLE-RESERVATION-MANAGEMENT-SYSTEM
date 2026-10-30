@@ -7,7 +7,7 @@
 #include "RestaurantTypes.h"
 #include "Input.h"
 #include "common.h"
-
+#define dataFile "transaction.txt"
 #define dataFile "products.txt"
 
 int loadProducts(State *changing, const char *path)
