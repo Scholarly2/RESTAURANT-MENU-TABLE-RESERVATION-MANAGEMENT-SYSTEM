@@ -196,10 +196,13 @@ int saveProducts(const State *s, const char *path)
     {
         const MenuItem *item = &s->products[i];
 
-        if (memchr(item, 0, sizeof(MenuItem)) == NULL)
-        {
-            return FALSE;
-        }
+        if (memchr(item->productName, '\0',
+           sizeof(item->productName)) == NULL)
+{
+    printf("Invalid product name termination. ID: %d\n",
+           item->productID);
+    return FALSE;
+}
 
         if (item->productID <=0||
             item->productID > s->lastProductID||
