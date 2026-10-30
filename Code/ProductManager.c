@@ -8,6 +8,8 @@
 #include "RestaurantTypes.h"
 #include "Input.h"
 #include "FileHelper.h"
+#include "menu.h"
+#include "Login.h"
 
 enum ProductUPDATE
 {
@@ -665,14 +667,17 @@ int showProductListMenu(void)
     return TRUE;
 }
 
-void productMenu(void)
+void ProductMenu(int role)
 {
     int choice;
+    
     if (S.productCount < 0 || S.productCount > MAX_PRODUCT) {
         puts("Invalid product data. Load a valid product file first.");
         return;
     }
-    do {
+    if (role == ROLE_MANAGER)
+    {
+        do {
             printf("\n=== PRODUCT MANAGEMENT ===");
             printf("1. Add product");
             printf("2. Update product menu");
@@ -680,7 +685,7 @@ void productMenu(void)
             printf("4. Search products menu");
             printf("5. Show menu items");
             printf("0. Go back");
-        if (!readInt("Choose: ", 0, 8, &choice)) return;
+        if (!readInt("Choose: ", 0, 5, &choice)) return;
         switch (choice) {
         case 1: addProduct(); break;
         case 2: updateProduct(); break;
@@ -690,5 +695,23 @@ void productMenu(void)
         case 0: break;
         } 
         if (feof(stdin) || ferror(stdin)) return;
-    } while (choice != 0);
+        } while (choice != 0);
+    }
+    else 
+    {
+            do {
+            printf("\n=== PRODUCT MANAGEMENT ===");
+            printf("1. Search products menu");
+            printf("2. Show menu items");
+            printf("0. Go back");
+        if (!readInt("Choose: ", 0, 2, &choice)) return;
+        switch (choice) {
+        case 1: searchProductMenu(); break;
+        case 2: if (!showProductListMenu()) return; break;
+        case 0: break;
+        } 
+        if (feof(stdin) || ferror(stdin)) return;
+        } while (choice != 0);
+    }
+    
 }
