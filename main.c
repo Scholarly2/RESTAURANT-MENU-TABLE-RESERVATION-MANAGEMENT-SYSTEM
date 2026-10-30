@@ -5,6 +5,8 @@
 #include "Include_type_struct/FileHelper.h"
 #include "Include_type_struct/menu.h"
 #include "Include_type_struct/Login.h"
+#define PRODUCT_FILE "../Data/products.txt"
+
 
 
 State S = {0};
@@ -81,6 +83,14 @@ int main(void)
         return EXIT_FAILURE;
     }
 
+    if (!loadProducts(&S, PRODUCT_FILE))
+{
+    printf("Failed to load product data!\n");
+}
+else
+{
+    printf("Total products: %d\n", S.productCount);
+}
 
     do {
         int role = accounts[currentAccount].role;
