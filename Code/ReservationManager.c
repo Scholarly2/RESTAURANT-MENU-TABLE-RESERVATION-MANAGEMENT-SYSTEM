@@ -136,7 +136,7 @@ printf("Next reservation ID: %d\n", nextID(S.lastResID));
     free(c);
     return TRUE;
 }
-int CheckInReservation(const char*phoneNumber){
+int checkInReservation(const char*phoneNumber){
     int index=-1;
     // Check phone number
     if (!isValidPhone(phoneNumber)) {
@@ -421,7 +421,7 @@ void ReservationMenu(int role){
 		        printf("Enter customer phone number: ");
 		        scanf("%19s", phoneNumber);
 		
-		        CheckInReservation(phoneNumber);
+		        checkInReservation(phoneNumber);
 		        break;
 		    }
 		
@@ -488,7 +488,7 @@ void ReservationMenu(int role){
 			    char phoneNumber[20];
 			    printf("Enter customer phone number: ");
 			    scanf("%19s", phoneNumber);
-			    CheckInReservation(phoneNumber);
+			    checkInReservation(phoneNumber);
 			    break;
 			}
 			
