@@ -486,4 +486,155 @@ int cancelOrder(int orderID){
     return TRUE;
 }
 
+void OrderMenu(int role)
+{
+    int choice;
 
+    if (S.orderCount < 0 || S.orderCount > MAX_ORDER ||
+        S.billCount < 0 || S.billCount > MAX_BILL) {
+        puts("Invalid order or bill data. Load valid data first.");
+        return;
+    }
+
+    if (role == ROLE_MANAGER)
+    {
+        do {
+            printf("\n=== ORDER AND BILL MANAGEMENT ===\n");
+            printf("1. Create order\n");
+            printf("2. Add food to order\n");
+            printf("3. Update order food\n");
+            printf("4. Delete food from order\n");
+            printf("5. View order details\n");
+            printf("6. View pre-ordered dishes\n");
+            printf("7. Checkout and print bill\n");
+            printf("8. Cancel order\n");
+            printf("9. Configure charge policy\n");
+            printf("0. Go back\n");
+
+            if (!readInt("Choose: ", 0, 9, &choice)) return;
+
+            switch (choice) {
+                case 1: createOrderTable(); break;
+                case 2: addOrderFood(); break;
+                case 3: updateOrderFood(); break;
+                case 4: deleteOrderFood(); break;
+                case 5: showAllOrderTable(); break;
+                case 6: listPreOrderedDishes(); break;
+                case 7: checkoutOrder(); break;
+                case 8: cancelOrder(); break;
+                case 9:
+                    int chargeChoice;
+                        double rate, baseFee, perKm;
+
+                        do {
+                            printf("\n=== CONFIGURE CHARGE POLICY ===\n");
+                            printf("1. Configure Dine-in Charge\n");
+                            printf("2. Configure Takeaway Charge\n");
+                            printf("3. Configure Delivery Charge\n");
+                            printf("0. Go back\n");
+
+                            if (!readInt("Choose: ", 0, 3, &chargeChoice)) return;
+
+                            switch (chargeChoice) {
+                                case 1:
+                                    printf("\n=== DINE-IN CHARGE ===\n");
+                                    printf("Current rate: %.2f%%\n", S.policy.dineInRate);
+
+                                    printf("Enter new dine-in rate (0-100): ");
+                                    if (scanf("%lf", &rate) != 1 ||
+                                        !isfinite(rate) || rate < 0 || rate > 100) {
+                                        printf("Invalid rate!\n");
+                                        while (getchar() != '\n');
+                                        break;
+                                    }
+
+                                    S.policy.dineInRate = rate;
+                                    printf("Dine-in charge updated successfully!\n");
+                                    break;
+
+                                case 2:
+                                    printf("\n=== TAKEAWAY CHARGE ===\n");
+                                    printf("Current rate: %.2f%%\n", S.policy.takeawayRate);
+
+                                    printf("Enter new takeaway rate (0-100): ");
+                                    if (scanf("%lf", &rate) != 1 ||
+                                        !isfinite(rate) || rate < 0 || rate > 100) {
+                                        printf("Invalid rate!\n");
+                                        while (getchar() != '\n');
+                                        break;
+                                    }
+
+                                    S.policy.takeawayRate = rate;
+                                    printf("Takeaway charge updated successfully!\n");
+                                    break;
+
+                                case 3:
+                                    printf("\n=== DELIVERY CHARGE ===\n");
+                                    printf("Current base fee: %.2f\n", S.policy.deliveryBase);
+                                    printf("Current fee per km: %.2f\n", S.policy.deliveryPerKm);
+
+                                    printf("Enter new delivery base fee: ");
+                                    if (scanf("%lf", &baseFee) != 1 ||
+                                        !isfinite(baseFee) || baseFee < 0) {
+                                        printf("Invalid base fee!\n");
+                                        while (getchar() != '\n');
+                                        break;
+                                    }
+
+                                    printf("Enter new delivery fee per km: ");
+                                    if (scanf("%lf", &perKm) != 1 ||
+                                        !isfinite(perKm) || perKm < 0) {
+                                        printf("Invalid fee per km!\n");
+                                        while (getchar() != '\n');
+                                        break;
+                                    }
+
+                                    S.policy.deliveryBase = baseFee;
+                                    S.policy.deliveryPerKm = perKm;
+
+                                    printf("Delivery charge updated successfully!\n");
+                                    break;
+
+                                case 0:
+                                    break;
+                            }
+
+                            if (feof(stdin) || ferror(stdin)) return;
+
+                        } while (chargeChoice != 0);
+
+                        break;
+                    }
+                    break;
+                case 0: break;
+            }
+
+            if (feof(stdin) || ferror(stdin)) return;
+
+        } while (choice != 0);
+    }
+    else if (role == ROLE_STAFF)
+    {
+        do {
+            printf("\n=== ORDER AND BILL MANAGEMENT ===\n");
+            printf("1. Search orders\n");
+            printf("2. Show orders\n");
+            printf("3. Search bills\n");
+            printf("4. Show bills\n");
+            printf("0. Go back\n");
+
+            if (!readInt("Choose: ", 0, 4, &choice)) return;
+
+            switch (choice) {
+                case 1: searchOrderMenu(); break;
+                case 2: showAllOrderTable(); break;
+                case 3: searchBillMenu(); break;
+                case 4: showBillList(); break;
+                case 0: break;
+            }
+
+            if (feof(stdin) || ferror(stdin)) return;
+
+        } while (choice != 0);
+    }
+}

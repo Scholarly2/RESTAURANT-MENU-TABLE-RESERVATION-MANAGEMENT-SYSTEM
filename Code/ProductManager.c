@@ -5,11 +5,11 @@
 #include <math.h>
 #include <limits.h>
 
-#include "RestaurantTypes.h"
-#include "Input.h"
-#include "FileHelper.h"
-#include "menu.h"
-#include "Login.h"
+#include "../Include_type_struct/RestaurantTypes.h"
+#include "../Include_type_struct/Input.h"
+#include "../Include_type_struct/FileHelper.h"
+#include "../Include_type_struct/menu.h"
+#include "../Include_type_struct/Login.h"
 
 enum ProductUPDATE
 {
@@ -209,7 +209,7 @@ int addProduct(void)
     S.productCount++;
     S.lastProductID = id;
 
-    if (!saveProduct(&S, PRODUCT_FILE)) {
+    if (!saveProducts(&S, PRODUCT_FILE)) {
         S.products[oldCount] = oldItem;
         S.productCount = oldCount;
         S.lastProductID = oldLastID;
@@ -277,7 +277,7 @@ int deleteProduct(void)
     oldStatus = S.products[index].productStatus;
     S.products[index].productStatus = PRODUCT_UNAVAILABLE;
 
-    if (!saveProduct(&S, PRODUCT_FILE)) {
+    if (!saveProducts(&S, PRODUCT_FILE)) {
         S.products[index].productStatus = oldStatus;
         printf("Failed to save product data.\n");
         return FALSE;
@@ -439,7 +439,7 @@ int updateProduct(void)
     }
 
     S.products[index] = item;
-    if (!saveProduct(&S, PRODUCT_FILE)) {
+    if (!saveProducts(&S, PRODUCT_FILE)) {
         S.products[index] = oldItem;
         printf("Failed to update or save the product.\n");
         return FALSE;
