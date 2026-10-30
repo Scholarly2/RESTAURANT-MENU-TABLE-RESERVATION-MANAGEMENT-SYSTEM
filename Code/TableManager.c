@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <limits.h>
 #include "Input.h"
 #include "RestaurantTypes.h"
 #include "menu.h"
@@ -23,11 +24,11 @@ void showTables(const Table *tables, int tableCount)
 
     printf("%-8s | %-6s | %s\n", "Table", "Seats", "Status");
     for (i = 0; i < tableCount; i++) {
-        printf("%-8d | %-6d | %s\n",
-               tables[i].tableNumber,
-               tables[i].tableType,
-               statusToString(tables[i].tableStatus));
+        printf("| %-8d | %-7d | %-12s |\n", tables[i].tableNumber,
+               tables[i].tableType, statusToString(tables[i].tableStatus));
     }
+    puts("+----------+---------+--------------+");
+    if (tableCount == 0) puts("(no tables)");
 }
 
 int findTableByID(const State *s, int tableID)
@@ -283,4 +284,46 @@ void sortTableByStatus(void)
         }
     }
     showTables(view, S.tableCount);
+}
+
+/* ======= MENU FOR TABLE MANAGER ========*/
+
+void tableMenu(void)
+{
+    int choice, tableID, option, guests, index, newStatus;
+
+    for (;;) {
+        puts("\n========== TABLE MANAGEMENT ==========");
+        puts("1. Show tables");
+        puts("2. Change table status");
+        puts("3. Find available table");
+        puts("4. Sort tables by status");
+        puts("0. Back");
+        if (!readInt("Choice: ", 0, 4, &choice) || choice == 0) return;
+
+        switch (choice) {
+        case 1:
+            showTables(S.tables, S.tableCount);
+            break;
+        case 2:
+            showTables(S.tables, S.tableCount);
+            if (!readInt("Table ID (0 Back): ", 0, INT_MAX, &tableID)) return;
+            if (tableID == 0) break;
+            if (findTableByID(&S, tableID) == -1) { puts("Table not found."); break; }
+            if (!readInt("New status (1 Available, 2 Booked, 3 Serving): ", 1, 3, &option)) return;
+            newStatus = option == 1 ? TABLE_AVAILABLE : (option == 2 ? TABLE_BOOKED : TABLE_SERVING);
+            puts(updateStatusTable(tableID, newStatus) ? "Table status updated."
+                                                       : "Table status was not changed.");
+            break;
+        case 3:
+            if (!readInt("Number of customers (1-8): ", 1, 8, &guests)) return;
+            index = findAvailableTable(&S, guests);
+            if (index < 0 || index >= S.tableCount) puts("No suitable table available.");
+            else showTables(&S.tables[index], 1);
+            break;
+        case 4:
+            sortTableByStatus();
+            break;
+        }
+    }
 }

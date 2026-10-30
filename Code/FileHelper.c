@@ -9,6 +9,7 @@
 #include "common.h"
 #define ORDER_HISTORY_FILE "Data/OrderHistory.txt"
 #define BILL_HISTORY_FILE "Data/BillHistory.txt"
+
 #define dataFile "products.txt"
 
 int loadProducts(State *changing, const char *path)
