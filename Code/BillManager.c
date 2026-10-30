@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <math.h>
-#include "RestaurantTypes.h"
+#include <RestaurantTypes.h>
+#include <time.h>
 
 int calculateOrderTotal(const Order *order, double *total){
     //check cac gia tri nhap vao

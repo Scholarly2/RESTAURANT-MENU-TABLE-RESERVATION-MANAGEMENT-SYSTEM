@@ -1,7 +1,41 @@
 #include <stdio.h>
 #include <string.h>
-#include "Login.h"
-#include "RestaurantTypes.h"
+#include "../Include_type_struct/Login.h"
+#include "../Include_type_struct/RestaurantTypes.h"
+#include "../Include_type_struct/Input.h"
+#include <conio.h>
+#include <ctype.h>
+
+
+void inputPassword(char *password, int maxSize) {
+    int i = 0;
+    char c;
+
+    while (i < maxSize - 1) {
+#ifdef _WIN32
+        c = _getch();
+#else
+        c = getchar(); 
+#endif
+        if (c == '\n' || c == '\r') {
+            password[i] = '\0';
+            break;
+        }
+        else if (c == 127 || c == 8) {
+            if (i > 0) {
+                i--;
+                printf("\b \b");
+                fflush(stdout);
+            }
+        }
+        else if (c >= 32 && c <= 126) {
+            password[i++] = c;
+            printf("*");
+            fflush(stdout);
+        }
+    }
+    printf("\n");
+}
 
 void initDefaultAdmin(Account accounts[], int *accountCount) {
     if (*accountCount == 0) {
@@ -18,7 +52,8 @@ int login(Account accounts[], int accountCount) {
     printf( "================================== " "LOGIN" " ==================================" "\n\n");
     int index = -1;
     while (index == -1) {
-        getString("Enter username: ", username, sizeof(username));
+        printf("Enter username: ");
+		getString(username, sizeof(username));
         trim(username);
         index = findAccountByUsername(accounts, accountCount, username);
         if (index == -1) {
@@ -95,7 +130,8 @@ void createStaffAccount(Account accounts[], int *accountCount) {
     char password[30];
     printf("\n============================ CREATE STAFF ACCOUNT ===========================\n" );
     while (1) {
-        getString("Enter username: ", username, sizeof(username));
+        printf("Enter username: ");
+		getString(username, sizeof(username));
         trim(username);
         if (isValidUsername(username)) break;
     }
@@ -117,7 +153,8 @@ void createStaffAccount(Account accounts[], int *accountCount) {
 void updateUserRole(Account accounts[], int accountCount) {
     char username[30];
     printf( "\n================================ " "CHANGE USER ROLE" " ===========================" "\n");
-    getString("Enter username: ", username, sizeof(username));
+    printf("Enter username: ");
+	getString(username, sizeof(username));
     trim(username);
     int index = findAccountByUsername(accounts, accountCount, username);
     if (index == -1) {

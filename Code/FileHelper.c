@@ -3,14 +3,14 @@
 #include <string.h>
 #include <math.h>
 #include <limits.h>
-#include "FileHelper.h"
-#include "RestaurantTypes.h"
-#include "Input.h"
-#include "common.h"
+#include "../Include_type_struct/FileHelper.h"
+#include "../Include_type_struct/RestaurantTypes.h"
+#include "../Include_type_struct/Input.h"
 #define ORDER_HISTORY_FILE "Data/OrderHistory.txt"
 #define BILL_HISTORY_FILE "Data/BillHistory.txt"
+#include <time.h>
+#include <ctype.h>
 
-#define dataFile "products.txt"
 
 int loadProducts(State *changing, const char *path)
 {
@@ -26,17 +26,15 @@ int loadProducts(State *changing, const char *path)
     int i,j, used;
     double price;
 
-    if (changing ==NULL || path == NULL)
-    {
-        return FALSE;
-    }
+    printf("Loading product file: %s\n", path);
 
-    file = fopen(path, "r");
-    if (file == NULL)
-    {
-        printf("Failed to open file: %s\n", path);
-        return FALSE;
-    }
+file = fopen(path, "r");
+if (file == NULL)
+{
+    printf("Failed to open file: %s\n", path);
+    perror("fopen");
+    return FALSE;
+}
 
     if (fgets(line, sizeof(line), file) == NULL)
     {
@@ -46,12 +44,12 @@ int loadProducts(State *changing, const char *path)
     
     used = 0;
     
-    if (sscanf(line, "PRODUCT|%15[^|]|%15[^\r\n]%n",
-        versionText, countText, &used) != 3)
-        {
-            fclose(file);
-            return FALSE;
-        }
+    if (sscanf(line, "PRODUCT|%15[^|]|%15[^|]|%15[^\r\n]%n",
+           versionText, countText, lastIDText, &used) != 3)
+	{
+    fclose(file);
+    return FALSE;
+	}
     
     if (used == 0 || strspn(line + used, "\r\n") != strlen(line + used))
     {
@@ -74,12 +72,14 @@ int loadProducts(State *changing, const char *path)
         }
 
         used = 0;
-        if (sscanf(line, "%31[^|]|%99[^|]|%63[^|]|%31[^|]|%31[^|]|%31[^\r\n]%n",
-            idText, name, typeText, priceText, quantityText, statusText, &used) != 6)
-        {
-            fclose(file);
-            return FALSE;
-        }
+        if (sscanf(line,
+    	"p|%31[^|]|%99[^|]|%63[^|]|%15[^|]|%31[^|]|%31[^\r\n]%n",
+    	idText, name, priceText, typeText,
+    	statusText, quantityText, &used) != 6)
+		{
+    	fclose(file);
+   		 return FALSE;
+		}
 
         if (used == 0 || strspn(line + used, "\r\n") != strlen(line + used))
         {
@@ -87,16 +87,50 @@ int loadProducts(State *changing, const char *path)
             return FALSE;
         }
         //check data 
-        if (!parseInt(idText, 1, INT_MAX, &id) ||
-            !isValidName(name) ||
-            !parseInt(typeText, STARTER, DRINK, &type) ||
-            !parsePrice(priceText, &price) ||
-            !parseInt(quantityText, 0, MAX_QUANTITY, &quantity) ||
-            !parseInt(statusText, PRODUCT_AVAILABLE, PRODUCT_UNAVAILABLE, &status))
-        {
-            fclose(file);
-            return FALSE;
-        }
+        if (!parseInt(idText, 1, INT_MAX, &id))
+{
+    printf("ERROR: Invalid ID at line %d\n", i + 2);
+    fclose(file);
+    return FALSE;
+}
+
+if (!isValidName(name))
+{
+    printf("ERROR: Invalid NAME at line %d: %s\n",
+           i + 2, name);
+    fclose(file);
+    return FALSE;
+}
+
+if (!parseInt(typeText, STARTER, DRINK, &type))
+{
+    printf("ERROR: Invalid TYPE at line %d\n", i + 2);
+    fclose(file);
+    return FALSE;
+}
+
+if (!parsePrice(priceText, &price))
+{
+    printf("ERROR: Invalid PRICE at line %d: %s\n",
+           i + 2, priceText);
+    fclose(file);
+    return FALSE;
+}
+
+if (!parseInt(quantityText, 0, MAX_QUANTITY, &quantity))
+{
+    printf("ERROR: Invalid QUANTITY at line %d\n", i + 2);
+    fclose(file);
+    return FALSE;
+}
+
+if (!parseInt(statusText, PRODUCT_AVAILABLE,
+              PRODUCT_UNAVAILABLE, &status))
+{
+    printf("ERROR: Invalid STATUS at line %d\n", i + 2);
+    fclose(file);
+    return FALSE;
+}
 
         if(id > lastID)
         {
@@ -104,13 +138,13 @@ int loadProducts(State *changing, const char *path)
             return FALSE;
         }
 
-        if(fabs(price) - round(price * 100) / 100 > 0.0001)
-        {
-            fclose(file);
-            return FALSE;
-        }
+        if (fabs(price - round(price * 100.0) / 100.0) > 0.000001)
+		{
+    		fclose(file);
+    		return FALSE;
+		}
 
-        for(j=0; i<i; j++)
+        for(j=0; j<i; j++)
         {
             if(products[j].productID == id) //checkID
             {
@@ -143,6 +177,7 @@ int loadProducts(State *changing, const char *path)
     memcpy(changing->products, products, sizeof(products));
     changing->productCount = count;
     changing->lastProductID = lastID;
+    printf("Load data successfully!");
     return TRUE;
 }
 
@@ -183,7 +218,7 @@ int saveProducts(const State *s, const char *path)
             return FALSE;
         }
         
-        for (j=0; i<i; j++)
+        for (j=0; j<i; j++)
         {
             if(s->products[j].productID == item->productID)
             {
@@ -192,12 +227,14 @@ int saveProducts(const State *s, const char *path)
         }
     }
 
-    file = fopen(path, "w");
+    printf("Opening product file for writing: %s\n", path);
 
-    if (file == NULL)
-    {
-        return FALSE;
-    }
+file = fopen(path, "w");
+if (file == NULL)
+{
+    perror("Cannot open product file for writing");
+    return FALSE;
+}
 
     if(fprintf(file, "PRODUCT|2|%d|%d\n", s->productCount, s->lastProductID) < 0)
     {
@@ -208,7 +245,7 @@ int saveProducts(const State *s, const char *path)
     for (i=0; i< s->productCount && success; i++)
     {
         const MenuItem *item = &s -> products[i];
-        if(fprinf(file, "p|%d|%s|%.2f|%d|%d|%d\n", 
+        if(fprintf(file, "p|%d|%s|%.2f|%d|%d|%d\n", 
                     item->productID,
                     item->productName,
                     item->productPrice,
@@ -225,76 +262,13 @@ int saveProducts(const State *s, const char *path)
     }
     return success;
 }
-int loadProduct(Product *list, int *count)
-{
-    Product item;
-    char    line[LINE_SIZE];
-    FILE   *f;
-    int     n, i, isDuplicate;
 
-    *count = 0;
 
-    f = fopen(PRODUCT_FILE, "r");
-    if (f == NULL) {
-        printf("File not found, start with an empty menu\n");
-        return FALSE;
-    }
 
-    while (*count < MAX_PRODUCT && fgets(line, sizeof(line), f) != NULL) {
-        n = sscanf(line, "%9[^,],%49[^,],%d,%f,%d,%d",
-                   item.productID, item.productName, &item.productType,
-                   &item.price, &item.status, &item.quantity);
-
-        if (n != 6) continue;
-        if (item.productType < 1 || item.productType > 5) continue;
-        if (item.price < 0) continue;
-        if (item.status != 1 && item.status != 2) continue;
-        if (item.quantity < 0) continue;
-
-        isDuplicate = FALSE;
-        for (i = 0; i < *count; i++) {
-            if (strcmp(list[i].productID, item.productID) == 0) {
-                isDuplicate = TRUE;
-                break;
-            }
-        }
-        if (isDuplicate) continue;
-
-        list[*count] = item;
-        (*count)++;
-    }
-
-    fclose(f);
-    printf("Loaded %d products\n", *count);
-    return TRUE;
-}
-
-int saveProduct(const Product *list, int count)
-{
-    FILE *f = fopen(PRODUCT_FILE, "w");
-    int i;
-
-    if (f == NULL) {
-        printf("Error: cannot open file to save\n");
-        return FALSE;
-    }
-
-    for (i = 0; i < count; i++) {
-        fprintf(f, "%s,%s,%d,%.2f,%d,%d\n",
-                list[i].productID, list[i].productName, list[i].productType,
-                list[i].price, list[i].status, list[i].quantity);
-    }
-
-    fclose(f);
-    return TRUE;
-}
-
-int saveTransaction(void) { return TRUE; }  
-int saveBillReport(void)  { return TRUE; }  
-nt loadTransaction(State *changing, const char *path){
+int loadTransaction(State *changing, const char *path){
     FILE *file;
     ChargePolicy policy = {0};
-    char line[LINE_SIZE];
+    char line[NAME_SIZE];
     int version = 0, tableCount = 0, resCount = 0, orderCount = 0;
     int lastResID = 0, lastOrderID = 0;
     int i, j, type, status, preOrder;
@@ -493,7 +467,7 @@ int saveTransaction(const State *s, const char *path){
 int loadBillReport(State *changing, const char *path)
 {
     FILE *file;
-    char line[LINE_SIZE];
+    char line[NAME_SIZE];
     int version = 0, billCount = 0, lastBillID = 0;
     int i, j, type;
     int success = TRUE;

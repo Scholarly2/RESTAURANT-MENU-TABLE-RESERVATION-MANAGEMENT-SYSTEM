@@ -7,6 +7,7 @@
 #include "Include_type_struct/Login.h"
 
 
+
 State S = {0};
 
 static void printMainMenu(int role)
@@ -81,10 +82,14 @@ int main(void)
         return EXIT_FAILURE;
     }
 
-    if (!loadProducts(&S, PRODUCT_FILE)) {
-        fprintf(stderr, "Cannot load restaurant data.\n");
-        return EXIT_FAILURE;
-    }
+    if (!loadProducts(&S, PRODUCT_FILE))
+{
+    printf("Failed to load product data!\n");
+}
+else
+{
+    printf("Total products: %d\n", S.productCount);
+}
 
     do {
         int role = accounts[currentAccount].role;
@@ -103,7 +108,7 @@ int main(void)
             TableMenu();
             break;
         case 3:
-            ReservationMenu();
+            ReservationMenu(role);
             break;
         case 4:
             OrderMenu(role);

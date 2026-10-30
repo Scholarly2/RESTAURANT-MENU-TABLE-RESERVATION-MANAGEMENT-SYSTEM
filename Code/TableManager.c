@@ -1,10 +1,10 @@
 #include <stdio.h>
 #include <limits.h>
-#include "Input.h"
-#include "RestaurantTypes.h"
-#include "menu.h"
-#include "Login.h"
-#include "FileHelper.h"
+#include "../Include_type_struct/Input.h"
+#include "../Include_type_struct/RestaurantTypes.h"
+#include "../Include_type_struct/menu.h"
+#include "../Include_type_struct/Login.h"
+#include "../Include_type_struct/FileHelper.h"
 
 /* ===================== HELPERS ===================== */
 
@@ -153,6 +153,7 @@ int promptPayOrder(int orderIndex)
     double discount, tax;
     int    confirm;
     Bill   b;
+    int orderID;
 
     if (orderIndex < 0 || orderIndex >= S.orderCount) return FALSE;
 
@@ -162,7 +163,7 @@ int promptPayOrder(int orderIndex)
     if (!calculateBill(&S.orders[orderIndex], S.policy, discount, tax, &b)) {
         return FALSE;
     }
-    displayBillReport(&b);
+  	printBillReport(orderID, discount,tax);
 
     if (!readInt("Confirm payment 1 Yes 0 No: ", 0, 1, &confirm)) return FALSE;
     if (confirm == 0) return FALSE;
@@ -211,11 +212,11 @@ int updateStatusTable(int tableID, int newStatus)
 
         if (r == -1) return FALSE;
         if (newStatus == TABLE_SERVING) {
-            return checkInReservation(S.reservations[r].reservationID);
+            return CheckInReservation(S.reservations[r].phoneNumber);
         }
         if (!readInt("Cancel booking 1 Yes 0 No: ", 0, 1, &confirm)) return FALSE;
         if (confirm == 0) return FALSE;
-        return cancelReservation(S.reservations[r].reservationID);
+        return cancelReservation(S.reservations[r].phoneNumber);
     }
 
     /* oldStatus == TABLE_SERVING */
@@ -288,7 +289,7 @@ void sortTableByStatus(void)
 
 /* ======= MENU FOR TABLE MANAGER ========*/
 
-void tableMenu(void)
+void TableMenu(void)
 {
     int choice, tableID, option, guests, index, newStatus;
 

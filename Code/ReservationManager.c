@@ -1,8 +1,38 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-#include <RestaurantTypes.h>
+#include "../Include_type_struct/RestaurantTypes.h"
 #include <string.h>
+#include "../Include_type_struct/menu.h"
+#include "../Include_type_struct/Login.h"
+#include <string.h>
+
+void sortBookingByTime(void)
+{
+    int i, j;
+    Reservation temp;
+
+    for (i = 0; i < S.resCount - 1; i++)
+    {
+        for (j = 0; j < S.resCount - i - 1; j++)
+        {
+            time_t time1, time2;
+
+            if (!toTimestamp(S.reservations[j].timeBooking, &time1))
+                continue;
+
+            if (!toTimestamp(S.reservations[j + 1].timeBooking, &time2))
+                continue;
+
+            if (time1 > time2)
+            {
+                temp = S.reservations[j];
+                S.reservations[j] = S.reservations[j + 1];
+                S.reservations[j + 1] = temp;
+            }
+        }
+    }
+}
 
 int createReservation(const char *nameCustomer, const char *phoneNumber, int NumberCustomer, DateTime timeBooking, int tableType, int requestedTableID) {
         // check array Maxreservation max already?
@@ -315,20 +345,20 @@ void printReservation(void){
                status);
     }
 }
-int showReservationMenu(int role){
-    int role;
+void ReservationMenu(int role){
+    int choice;
     if (S.resCount<0||S.resCount>MAX_RESERVATIONS){
         puts("Invalid reservation data. Load a valid reservation first.");
         return;
     }
     if (role== ROLE_MANAGER){
         do {
-            printf("\n=== RESERVATION MANAGEMENT ===");
-            printf("1. Create reservation");
-            printf("2. Cancel reservation");
-            printf("3. Sort Booking reservation and print");
-            printf("4. CheckIn reservation");
-            printf("0. go back");
+            printf("\n=== RESERVATION MANAGEMENT ===\n");
+            printf("1. Create reservation\n");
+            printf("2. Cancel reservation\n");
+            printf("3. Sort Booking reservation and print\n");
+            printf("4. CheckIn reservation\n");
+            printf("0. go back\n");
             if (!readInt("Choose: ",0,4,&choice)) return;
             switch (choice){
                 case 1: createReservation(); break;
@@ -339,13 +369,14 @@ int showReservationMenu(int role){
             }
             if (feof(stdin)||ferror(stdin)) return;
         } while (choice!=0);
+    }
         else{
             do{
-                printf("\n=== RESERVATION MANAGEMENT ===");
-                printf("1. Create reservation");
-                printf("2. Cancel reservation");
-                printf("3. CheckIN reservation");
-                printf("0. go back");
+                printf("\n=== RESERVATION MANAGEMENT ===\n");
+                printf("1. Create reservation\n");
+                printf("2. Cancel reservation\n");
+                printf("3. CheckIN reservation\n");
+                printf("0. go back\n");
                 if (!readInt("Choose:",0,3,&choice)) return;
                 switch(choice){
                     case 1: createReservation(); break;

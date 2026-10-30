@@ -11,14 +11,8 @@
 #include "../Include_type_struct/menu.h"
 #include "../Include_type_struct/Login.h"
 
-enum ProductUPDATE
-{
-    UP_Name = 1,
-    UP_PRICE,
-    UP_TYPE,
-    UP_QUANTITY,
-    UP_STATUS
-};
+extern State S;
+
 
 //find product
 int findProductByID(const State *s, int id)
@@ -74,7 +68,7 @@ int updatePrice(MenuItem *item, double value)
 
 int updateName(MenuItem *item, const char *value)
 {
-    if (item == NULL || !isValidName(value))
+    if (item == NULL || !isValidProductName(value))
     {
         return FALSE;
     }
@@ -621,7 +615,12 @@ int searchProductMenu(void)
     int choice, id;
     char keyword[NAME_SIZE];
     do {
-        puts("\n=== SEARCH PRODUCT ===\n1. Search by ID\n2. Search by name\n0. Back");
+        puts("\n=== SEARCH PRODUCT ===\n");
+        printf("1. Search by ID\n");
+        printf("2. Search by name\n");
+        printf("0. Back\n");
+        
+
         if (!readInt("Choose: ", 0, 2, &choice)) return FALSE;
         switch (choice) {
         case 1:
@@ -654,8 +653,11 @@ int showProductListMenu(void)
 {
     int choice;
     do {
-        puts("\n=== SHOW PRODUCT LIST ===");
-        puts("1. Sort by ID\n2. Sort by price (low to high)\n3. Sort by name (A-Z)\n0. Back");
+        puts("\n=== SHOW PRODUCT LIST ===\n");
+        printf("1. Sort by ID\n");
+        printf("2. Sort by price (low to high)\n");
+        printf("3. Sort by name (A-Z)\n");
+        printf("0. Back\n");
         if (!readInt("Choose: ", 0, 3, &choice)) return FALSE;
         switch (choice) {
         case 1: sortByID(); break;
@@ -678,13 +680,13 @@ void ProductMenu(int role)
     if (role == ROLE_MANAGER)
     {
         do {
-            printf("\n=== PRODUCT MANAGEMENT ===");
-            printf("1. Add product");
-            printf("2. Update product menu");
-            printf("3. Delete product by name");
-            printf("4. Search products menu");
-            printf("5. Show menu items");
-            printf("0. Go back");
+            printf("\n=== PRODUCT MANAGEMENT ===\n");
+            printf("1. Add product\n");
+            printf("2. Update product menu\n");
+            printf("3. Delete product by name\n");
+            printf("4. Search products menu\n");
+            printf("5. Show menu items\n");
+            printf("0. Go back\n");
         if (!readInt("Choose: ", 0, 5, &choice)) return;
         switch (choice) {
         case 1: addProduct(); break;
@@ -701,9 +703,9 @@ void ProductMenu(int role)
     {
             do {
             printf("\n=== PRODUCT MANAGEMENT ===");
-            printf("1. Search products menu");
-            printf("2. Show menu items");
-            printf("0. Go back");
+            printf("1. Search products menu\n");
+            printf("2. Show menu items\n");
+            printf("0. Go back\n");
         if (!readInt("Choose: ", 0, 2, &choice)) return;
         switch (choice) {
         case 1: searchProductMenu(); break;
