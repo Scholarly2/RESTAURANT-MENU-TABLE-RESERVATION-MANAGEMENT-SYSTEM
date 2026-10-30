@@ -1,1 +1,18 @@
-
+<<<<<<<<< Temporary merge branch 1
+PRODUCT|2|10|10
+1|Spring Rolls|1|45000.00|50|0
+2|Chicken Soup|1|35000.00|40|0
+3|Beef Steak|2|150000.00|30|0
+4|Grilled Chicken|2|95000.00|35|0
+5|French Fries|3|30000.00|60|0
+6|Green Salad|3|40000.00|40|0
+7|Chocolate Cake|4|45000.00|25|0
+8|Vanilla Ice Cream|4|25000.00|30|0
+9|Orange Juice|5|30000.00|50|0
+10|Lemon Tea|5|20000.00|0|1
+=========
+PRODUCT|2|3|3
+p|1|Fried Rice|35000.00|2|0|100
+p|2|Chicken Soup|25000.00|1|0|50
+p|3|Orange Juice|18000.00|5|0|80
+>>>>>>>>> Temporary merge branch 2

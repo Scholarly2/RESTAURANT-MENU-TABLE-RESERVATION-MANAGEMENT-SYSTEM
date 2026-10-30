@@ -615,7 +615,16 @@ int searchProductMenu(void)
     int choice, id;
     char keyword[NAME_SIZE];
     do {
-        puts("\n=== SEARCH PRODUCT ===\n1. Search by ID\n2. Search by name\n0. Back");
+<<<<<<<<< Temporary merge branch 1
+        puts("\n=== SEARCH PRODUCT ===\n\n1. Search by ID\n\n2. Search by name\n\n0. Back");
+        if (!readInt("\nChoose: ", 0, 2, &choice)) return FALSE;
+=========
+        puts("\n=== SEARCH PRODUCT ===\n");
+        printf("1. Search by ID\n");
+        printf("2. Search by name\n");
+        printf("0. Back\n");
+        
+
         if (!readInt("Choose: ", 0, 2, &choice)) return FALSE;
         switch (choice) {
         case 1:
@@ -648,8 +657,16 @@ int showProductListMenu(void)
 {
     int choice;
     do {
+<<<<<<<<< Temporary merge branch 1
         puts("\n=== SHOW PRODUCT LIST ===");
-        puts("1. Sort by ID\n2. Sort by price (low to high)\n3. Sort by name (A-Z)\n0. Back");
+        puts("1. Sort by ID\n\n2. Sort by price (low to high)\n\n3. Sort by name (A-Z)\n\n0. Back");
+=========
+        puts("\n=== SHOW PRODUCT LIST ===\n");
+        printf("1. Sort by ID\n");
+        printf("2. Sort by price (low to high)\n");
+        printf("3. Sort by name (A-Z)\n");
+        printf("0. Back\n");
+>>>>>>>>> Temporary merge branch 2
         if (!readInt("Choose: ", 0, 3, &choice)) return FALSE;
         switch (choice) {
         case 1: sortByID(); break;
