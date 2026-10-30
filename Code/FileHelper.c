@@ -3,14 +3,10 @@
 #include <string.h>
 #include <math.h>
 #include <limits.h>
-#include "../Include_type_struct/FileHelper.h"
-#include "../Include_type_struct/RestaurantTypes.h"
-#include "../Include_type_struct/Input.h"
-#define ORDER_HISTORY_FILE "Data/OrderHistory.txt"
-#define BILL_HISTORY_FILE "Data/BillHistory.txt"
-#include <time.h>
-#define dataFile "Data/products.txt"
-#include <ctype.h>
+#include "FileHelper.h"
+#include "RestaurantTypes.h"
+#include "Input.h"
+#include "common.h"
 
 
 int loadProducts(State *changing, const char *path)

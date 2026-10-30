@@ -5,7 +5,6 @@
 #include "Include_type_struct/FileHelper.h"
 #include "Include_type_struct/menu.h"
 #include "Include_type_struct/Login.h"
-#define PRODUCT_FILE "Data/products.txt"
 
 
 

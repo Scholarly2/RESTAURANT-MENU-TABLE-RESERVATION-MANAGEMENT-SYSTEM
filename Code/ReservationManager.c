@@ -353,106 +353,38 @@ void ReservationMenu(int role){
     }
     if (role== ROLE_MANAGER){
         do {
-            printf("\n=== RESERVATION MANAGEMENT ===");
-            printf("1. Create reservation");
-            printf("2. Cancel reservation");
-            printf("3. Sort Booking reservation and print");
-            printf("4. CheckIn reservation");
-            printf("0. go back");
+            printf("\n=== RESERVATION MANAGEMENT ===\n");
+            printf("1. Create reservation\n");
+            printf("2. Cancel reservation\n");
+            printf("3. Sort Booking reservation and print\n");
+            printf("4. CheckIn reservation\n");
+            printf("0. go back\n");
             if (!readInt("Choose: ",0,4,&choice)) return;
-		switch (choice) {
-		    case 1:
-		    {
-		        char nameCustomer[100];
-		        char phoneNumber[20];
-		        int NumberCustomer;
-		        DateTime timeBooking;
-		        int tableType;
-		        int requestedTableID;
-		
-		        // Nhập thông tin khách hàng và đặt bàn tại đây
-		        createReservation(nameCustomer, phoneNumber,
-		                          NumberCustomer, timeBooking,
-		                          tableType, requestedTableID);
-		        break;
-		    }
-		
-		    case 2:
-		    {
-		        char phoneNumber[20];
-		
-		        printf("Enter customer phone number: ");
-		        scanf("%19s", phoneNumber);
-		
-		        cancelReservation(phoneNumber);
-		        break;
-		    }
-		
-		    case 3:
-		        sortBookingByTime();
-		        printReservation();
-		        break;
-		
-		    case 4:
-		    {
-		        char phoneNumber[20];
-		
-		        printf("Enter customer phone number: ");
-		        scanf("%19s", phoneNumber);
-		
-		        CheckInReservation(phoneNumber);
-		        break;
-		    }
-		
-		    case 0:
-		        break;
-		}
+            switch (choice){
+                case 1: createReservation(); break;
+                case 2: cancelReservation(); break;
+                case 3: sortBookingByTime() printReservation(); break;
+                case 4: CheckInReservation(); break;
+                case 0: break;
+            }
             if (feof(stdin)||ferror(stdin)) return;
         } while (choice!=0);
     }
         else{
             do{
-                printf("\n=== RESERVATION MANAGEMENT ===");
-                printf("1. Create reservation");
-                printf("2. Cancel reservation");
-                printf("3. CheckIN reservation");
-                printf("0. go back");
+                printf("\n=== RESERVATION MANAGEMENT ===\n");
+                printf("1. Create reservation\n");
+                printf("2. Cancel reservation\n");
+                printf("3. CheckIN reservation\n");
+                printf("0. go back\n");
                 if (!readInt("Choose:",0,3,&choice)) return;
                 switch(choice){
-			case 1: {
-			    char nameCustomer[100];
-			    char phoneNumber[20];
-			    int NumberCustomer;
-			    DateTime timeBooking;
-			    int tableType;
-			    int requestedTableID;
-			
-			    // Nhập thông tin trước khi gọi hàm
-			    createReservation(nameCustomer, phoneNumber,
-			                      NumberCustomer, timeBooking,
-			                      tableType, requestedTableID);
-			    break;
-			}
-			
-			case 2: {
-			    char phoneNumber[20];
-			    printf("Enter customer phone number: ");
-			    scanf("%19s", phoneNumber);
-			    cancelReservation(phoneNumber);
-			    break;
-			}
-			
-			case 3: {
-			    char phoneNumber[20];
-			    printf("Enter customer phone number: ");
-			    scanf("%19s", phoneNumber);
-			    CheckInReservation(phoneNumber);
-			    break;
-			}
-			
-			case 0: break;
+                    case 1: createReservation(); break;
+                    case 2: cancelReservation(); break;
+                    case 3: checkInReservation(); break;
+                    case 0: break;
                 }
                 if (feof(stdin)||ferror(stdin)) return;
             } while (choice !=0);
         }
-}
+    }
