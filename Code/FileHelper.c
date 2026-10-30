@@ -9,7 +9,7 @@
 #define ORDER_HISTORY_FILE "Data/OrderHistory.txt"
 #define BILL_HISTORY_FILE "Data/BillHistory.txt"
 #include <time.h>
-#define dataFile "../Data/products.txt"
+#define dataFile "Data/products.txt"
 #include <ctype.h>
 
 
