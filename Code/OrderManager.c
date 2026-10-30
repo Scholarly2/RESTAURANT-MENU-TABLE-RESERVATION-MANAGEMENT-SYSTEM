@@ -152,8 +152,20 @@ int createOrderTable(int type, int reservationID, int tableID, int guests, doubl
             }
         }
 
-        // luu thay doi
+        // luu thay doi vao OrderHistory.txt
         int newOrderID = c->orders[orderIndex].orderID;
+
+        if (!saveTransaction(c, "Data/OrderHistory.txt")) {
+            free(c);
+            printf("Cannot save order history.\n");
+            return FALSE;
+        }
+
+        // cap nhat State hien tai
+        S = *c;
+
+        free(c);
+
         printf("Create order successfully. Order ID: %d\n", newOrderID);
     }
     return TRUE;
@@ -228,12 +240,17 @@ int addOrderFood(int orderID, int productID, int quantity){
         return FALSE;
     }
 
-    // luu thay doi
-    char oldValue[20];
-    char newValue[20];
+    // luu thay doi vao OrderHistory.txt
+    if (!saveTransaction(copy, "Data/OrderHistory.txt")) {
+        free(copy);
+        printf("Cannot save order history.\n");
+        return FALSE;
+    }
 
-    sprintf(oldValue, "%d", oldQuantity);
-    sprintf(newValue, "%d", newQuantity);
+    // cap nhat State hien tai
+    S = *copy;
+
+    free(copy);
 
     printf("Add order food successfully.\n");
     return TRUE;
@@ -248,7 +265,7 @@ int updateOrderFood(int orderID, int productID, int newQuantity){
     if(findOrderIndexByID == -1 || S.orders[findOrderIndexByID].orderStatus != ORDER_OPEN || findOrderIndexByID >= S.orderCount){
         return FALSE;
     }
-    showAllOrderItem(&S.orders[findOrderIndexByID]);
+    showAllOrderFood(&S.orders[findOrderIndexByID]);
     // bat dau tim kiem san pham trong order do
     printf("Enter ID of the product: ");
     scanf("%d", &productID);
@@ -257,8 +274,12 @@ int updateOrderFood(int orderID, int productID, int newQuantity){
         return FALSE;
     }
 
-    // kiem tra so luong moi co hop le khong
-    if (newQuantity < 1 || newQuantity > MAX_QUANTITY){
+    // nhap so luong moi
+    printf("Enter new quantity: ");
+
+    if (scanf("%d", &newQuantity) != 1 ||
+        newQuantity < 1 || newQuantity > MAX_QUANTITY) {
+        printf("Quantity is invalid.\n");
         return FALSE;
     }
 
@@ -272,14 +293,18 @@ int updateOrderFood(int orderID, int productID, int newQuantity){
         free(copy);
         return FALSE;
     }
-        // chuyen so luong thanh chuoi
-    char oldValue[20];
-    char newValue[20];
+    // luu thay doi vao OrderHistory.txt
+    if (!saveTransaction(copy, "Data/OrderHistory.txt")) {
+        free(copy);
+        printf("Cannot save order history.\n");
+        return FALSE;
+    }
 
-    sprintf(oldValue, "%d", oldQuantity);
-    sprintf(newValue, "%d", newQuantity);
+    // cap nhat State hien tai
+    S = *copy;
 
-    // luu thay doi
+    free(copy);
+
     printf("Update order food successfully.\n");
     return TRUE;
 }
@@ -293,11 +318,11 @@ int deleteOrderFood(int orderID, int productID){
     if(findOrderIndexByID == -1 || S.orders[findOrderIndexByID].orderStatus != ORDER_OPEN || findOrderIndexByID >= S.orderCount){
         return FALSE;
     }
-    showAllOrderItem(&S.orders[findOrderIndexByID]);
+    showAllOrderFood(&S.orders[findOrderIndexByID]);
     
     // tim product bang id cua order
     printf("Enter ID of the product: ");
-    scanf("%d", &productID);
+    scanf("%s", &productID);
     int findOrderItemIndex = findOrderItem(&S.orders[findOrderIndexByID], productID);
     if(findOrderItemIndex == -1){
         return FALSE;
@@ -313,15 +338,20 @@ int deleteOrderFood(int orderID, int productID){
     printf("Product: %d ", S.orders[findOrderIndexByID].items[findOrderItemIndex].productName);
     printf("1.Delete\n2.Cancel\nYour choice: ");
     if(scanf("%d", &choice) != 1){
-        printf("Invaild choose!");
+        free(copy);
+        printf("Invalid choice!");
         return FALSE;
     }
+
     if(choice == 2){
+        free(copy);
         printf("Delete cancelled!");
         return FALSE;
     }
-    if(choice == -1 ){
-        printf("Invaild choose!");
+
+    if(choice != 1){
+        free(copy);
+        printf("Invalid choice!");
         return FALSE;
     }
 
@@ -332,9 +362,42 @@ int deleteOrderFood(int orderID, int productID){
         }
     }
 
-    //Luu thay doi
-    char oldValuse[20];
-    sprint(oldValuse, "%d", productID);
+    //luu vao file
+    if (!saveTransaction(copy, "Data/OrderHistory.txt")) {
+        free(copy);
+        printf("Cannot save order history.\n");
+        return FALSE;
+    }
+
+    S = *copy;
+    free(copy);
+
+    printf("Delete order food successfully.\n");
+    return TRUE;
+}
+
+int changeOrderQuantity(State *s, int orderIndex, int productID, int newQuantity){
+    //check dieu kien vao
+    if(s == NULL || orderIndex < 0 || orderIndex >= s->orderCount){
+        return FALSE;
+    }
+
+    //kiem tra Quantity mooi
+    if(newQuantity < 0 || newQuantity > MAX_QUANTITY){
+        return FALSE;
+    }
+
+    Order *order = &s->orders[orderIndex];
+
+    int itemIndex = findOrderItem(order, productID);
+
+    if(itemIndex == -1){
+        return FALSE;
+    }
+
+    //thay doi Quantity
+    order->items[itemIndex].quantity = newQuantity;
+
     return TRUE;
 }
 
@@ -419,6 +482,9 @@ int findOpenOrder(const State *s, int tableID, int reservationID){
 void showAllOrderFood(const Order *order){
     //hien thi tat ca cac mon trong order;
     for(int i = 0; i < order->itemCount; i++){
+        if (order->items[i].quantity == 0) {
+        continue;
+    }
         printf("ProductID: %d\n", order->items[i].productID);
         printf("ProductName: %s\n", order->items[i].productName);
         printf("ProductType: %d\n", order->items[i].productType);
@@ -457,14 +523,14 @@ int releaseOrderStock(State *s, int orderIndex){
 
     // giai phong ton kho cho moi mon trong order
     for(int i = 0; i < order->itemCount; i++){
+        
         OrderItem *item = &order->items[i];
 
         int productIndex = findProductByID(s, item->productID);
-
+        
         if(productIndex == -1){
             continue;
         }
-
         s->products[productIndex].quantity += item->quantity;
     }
 
@@ -473,16 +539,48 @@ int releaseOrderStock(State *s, int orderIndex){
 
 int cancelOrder(int orderID){
     // tim order bang ID
-    int findOrderIndexByID = findOrderByID(&S, orderID);
-    if(findOrderIndexByID == -1 || S.orders[findOrderIndexByID].orderStatus != ORDER_OPEN || findOrderIndexByID >= S.orderCount){
+    printf("Enter order ID to cancel: ");
+    if(scanf("%d", &orderID) != 1){
+        printf("Invalid order ID.\n");
         return FALSE;
     }
 
-    // cancel order va giai phong ton kho
-    if(!releaseOrderStock(&S, findOrderIndexByID)){
+    int orderIndex = findOrderByID(&S, orderID);
+
+    if(orderIndex == -1){
+        printf("Order not found.\n");
         return FALSE;
     }
 
+    if(S.orders[orderIndex].orderStatus != ORDER_OPEN){
+        printf("This order cannot be cancelled.\n");
+        return FALSE;
+    }
+
+    State *copy = copyState(&S);
+
+    if(copy == NULL){
+        return FALSE;
+    }
+
+    if(!releaseOrderStock(copy, orderIndex)){
+        free(copy);
+        printf("Cannot release order stock.\n");
+        return FALSE;
+    }
+
+    copy->orders[orderIndex].orderStatus = ORDER_CANCELLED;
+
+    if(!saveTransaction(copy, "Data/OrderHistory.txt")){
+        free(copy);
+        printf("Cannot save order history.\n");
+        return FALSE;
+    }
+
+    S = *copy;
+    free(copy);
+
+    printf("Cancel order successfully.\n");
     return TRUE;
 }
 
@@ -490,8 +588,8 @@ void OrderMenu(int role)
 {
     int choice;
 
-    if (S.orderCount < 0 || S.orderCount > MAX_ORDER ||
-        S.billCount < 0 || S.billCount > MAX_BILL) {
+    if (S.orderCount < 0 || S.orderCount > MAX_ORDERS ||
+        S.billCount < 0 || S.billCount > MAX_BILLS) {
         puts("Invalid order or bill data. Load valid data first.");
         return;
     }

@@ -7,7 +7,8 @@
 #include "RestaurantTypes.h"
 #include "Input.h"
 #include "common.h"
-
+#define ORDER_HISTORY_FILE "Data/OrderHistory.txt"
+#define BILL_HISTORY_FILE "Data/BillHistory.txt"
 #define dataFile "products.txt"
 
 int loadProducts(State *changing, const char *path)
@@ -585,7 +586,7 @@ int saveBillReport(const State *s, const char *path)
             b->itemCount < 0 || b->itemCount > MAX_ITEMS) return FALSE;
     }
 
-    file = fopen(path, "a");
+    file = fopen(path, "w");
     if (file == NULL) return FALSE;
 
     if (fprintf(file, "BILL|2|%d|%d\n", s->billCount, s->lastBillID) < 0)
