@@ -103,7 +103,7 @@ int main(void)
             TableMenu();
             break;
         case 3:
-            ReservationMenu();
+            ReservationMenu(role);
             break;
         case 4:
             OrderMenu(role);

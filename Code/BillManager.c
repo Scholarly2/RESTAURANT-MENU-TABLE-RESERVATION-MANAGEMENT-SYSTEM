@@ -1,8 +1,33 @@
 #include <stdio.h>
 #include <math.h>
-#include <RestaurantTypes.h>
+#include "../Include_type_struct/RestaurantTypes.h"
 #include <time.h>
+#include <stdlib.h>
+#include "../Include_type_struct/FileHelper.h"
 
+State *copyState(const State *s)
+{
+    State *copy;
+
+    if (s == NULL) {
+        return NULL;
+    }
+
+    copy = (State *)malloc(sizeof(State));
+
+    if (copy == NULL) {
+        return NULL;
+    }
+
+    *copy = *s;
+
+    return copy;
+}
+
+double roundMoney(double value)
+{
+    return round(value * 100.0) / 100.0;
+}
 int calculateOrderTotal(const Order *order, double *total){
     //check cac gia tri nhap vao
     if(total == NULL || order == NULL || order->itemCount < 0 || order->itemCount > MAX_ITEMS){

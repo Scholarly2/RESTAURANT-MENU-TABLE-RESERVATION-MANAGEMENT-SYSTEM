@@ -195,23 +195,25 @@ int addOrderFood(int orderID, int productID, int quantity); // done
 int updateOrderFood(int orderID, int productID, int newQuantity); //done
 int deleteOrderFood(int orderID, int productID); //done
 void showAllOrderFood(const Order *order); //not done
-void showAllOrderTable(void); // not done
+void showAllOrderTable(void); //done
 void listPreOrderedDishes(int tableID); //done
-int releaseOrderStock(State *s, int orderIndex); // not done
-int cancelOrder(int orderID); // not done
+int releaseOrderStock(State *s, int orderIndex); // done
+int cancelOrder(int orderID); // done
+int appendEmptyOrder(State *s, int type, int reservationID,
+                     int tableID, int guests, double distance);
 
 //bill
-int calculateOrderTotal(const Order *order, double *total); // not done
+int calculateOrderTotal(const Order *order, double *total); //done
 int calculateServiceCharge(int orderType, double subtotal,
                            ChargePolicy policy, double distance, double *fee); //done
 int applyDineInCharge(double subtotal, double rate, double *fee); //done
 int applyTakeawayCharge(double subtotal, double rate, double *fee); //done
 int applyDeliveryCharge(double distance, double baseFee, double perKm, double *fee); //done
-int configureCharges(ChargePolicy policy); //not done
+int configureCharges(ChargePolicy policy); //done
 int calculateBill(const Order *order, ChargePolicy policy,
-                  double discountRate, double taxRate, Bill *bill); //not done
-int validateBill(const Bill *bill); //not done
-int printBillReport(int orderID, double discountRate, double taxRate); // in processing
-int checkoutOrder(int orderID, double discountRate, double taxRate); //not done
+                  double discountRate, double taxRate, Bill *bill); //done
+int validateBill(const Bill *bill); //done
+int printBillReport(int orderID, double discountRate, double taxRate); //done
+int checkoutOrder(int orderID, double discountRate, double taxRate); //done
 
 #endif

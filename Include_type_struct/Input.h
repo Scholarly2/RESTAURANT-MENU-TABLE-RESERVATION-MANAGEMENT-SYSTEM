@@ -46,5 +46,17 @@ int isDuplicateID(const State *s, int id);
 int readOrderType(enum OrderType *type);
 int readBillInput(int *orderID, double *discount, double *tax);
 
+//check account
+int isValidPassword(const char *password);
+int isValidUsername(const char *username);
+
+//check Phu
+int isEmpty(const char *text);
+void getString(char *buffer, int size);
+void trim(char *str);
+int readName(const char *prompt, int customer, char *name);
+int readPrice(const char *prompt, double *price);
+int isValidCustomerName(const char *name);
+
 #endif
 

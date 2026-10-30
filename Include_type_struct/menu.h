@@ -8,7 +8,7 @@
 //dung cac ham trong nay de code, dung ten tranh conflict
 void OrderMenu(int role);
 void ProductMenu(int role);
-void ReservationMenu();
+void ReservationMenu(int role);
 void TableMenu();
  
 #endif

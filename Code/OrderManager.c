@@ -1,9 +1,33 @@
 #include <stdio.h>
-#include <RestaurantTypes.h>
+#include "../Include_type_struct/RestaurantTypes.h"
 #include <stdlib.h>
 #include <math.h>
-#include "Input.c"
-#include <menu.h>
+#include "../Include_type_struct/Input.h"
+#include "../Include_type_struct/menu.h"
+#include "../Include_type_struct/Login.h"
+#include "../Include_type_struct/FileHelper.h"
+
+int appendEmptyOrder(State *s, int type, int reservationID,
+                     int tableID, int guests, double distance)
+{
+    Order newOrder = {0};
+
+    if (s == NULL) return -1;
+    if (s->orderCount >= MAX_ORDERS) return -1;
+
+    newOrder.orderID = ++s->lastOrderID;
+    newOrder.orderType = type;
+    newOrder.reservationID = reservationID;
+    newOrder.tableID = tableID;
+    newOrder.NumberCustomer = guests;
+    newOrder.deliveryDistance = distance;
+    newOrder.orderStatus = ORDER_OPEN;
+    newOrder.itemCount = 0;
+
+    s->orders[s->orderCount] = newOrder;
+
+    return s->orderCount++;
+}
 
 int createOrderTable(int type, int reservationID, int tableID, int guests, double distance){
 
@@ -460,7 +484,7 @@ int findOrderItem(const Order *order, int productID){
     //tim kiem bang ID trong order
     for(int i = 0; i , order->itemCount; i++){
         if(order->items[i].productID == productID){
-            retuern i;
+            return i;
         }
         else{
             return FALSE;
@@ -477,6 +501,7 @@ int findOpenOrder(const State *s, int tableID, int reservationID){
         else{
             return FALSE;
         }
+	}
 }
 
 void showAllOrderFood(const Order *order){
@@ -584,9 +609,30 @@ int cancelOrder(int orderID){
     return TRUE;
 }
 
+
 void OrderMenu(int role)
 {
     int choice;
+
+    // Variables for order functions
+    int type = 0;
+    int reservationID = 0;
+    int tableID = 0;
+    int guests = 0;
+    double distance = 0;
+
+    int orderID = 0;
+    int productID = 0;
+    int quantity = 0;
+    int newQuantity = 0;
+
+    // Variables for checkout
+    double discountRate = 0;
+    double taxRate = 0;
+
+    // Variables for charge policy
+    int chargeChoice;
+    double rate, baseFee, perKm;
 
     if (S.orderCount < 0 || S.orderCount > MAX_ORDERS ||
         S.billCount < 0 || S.billCount > MAX_BILLS) {
@@ -594,6 +640,7 @@ void OrderMenu(int role)
         return;
     }
 
+    // MANAGER MENU
     if (role == ROLE_MANAGER)
     {
         do {
@@ -609,129 +656,188 @@ void OrderMenu(int role)
             printf("9. Configure charge policy\n");
             printf("0. Go back\n");
 
-            if (!readInt("Choose: ", 0, 9, &choice)) return;
-
-            switch (choice) {
-                case 1: createOrderTable(); break;
-                case 2: addOrderFood(); break;
-                case 3: updateOrderFood(); break;
-                case 4: deleteOrderFood(); break;
-                case 5: showAllOrderTable(); break;
-                case 6: listPreOrderedDishes(); break;
-                case 7: checkoutOrder(); break;
-                case 8: cancelOrder(); break;
-                case 9:
-                    int chargeChoice;
-                        double rate, baseFee, perKm;
-
-                        do {
-                            printf("\n=== CONFIGURE CHARGE POLICY ===\n");
-                            printf("1. Configure Dine-in Charge\n");
-                            printf("2. Configure Takeaway Charge\n");
-                            printf("3. Configure Delivery Charge\n");
-                            printf("0. Go back\n");
-
-                            if (!readInt("Choose: ", 0, 3, &chargeChoice)) return;
-
-                            switch (chargeChoice) {
-                                case 1:
-                                    printf("\n=== DINE-IN CHARGE ===\n");
-                                    printf("Current rate: %.2f%%\n", S.policy.dineInRate);
-
-                                    printf("Enter new dine-in rate (0-100): ");
-                                    if (scanf("%lf", &rate) != 1 ||
-                                        !isfinite(rate) || rate < 0 || rate > 100) {
-                                        printf("Invalid rate!\n");
-                                        while (getchar() != '\n');
-                                        break;
-                                    }
-
-                                    S.policy.dineInRate = rate;
-                                    printf("Dine-in charge updated successfully!\n");
-                                    break;
-
-                                case 2:
-                                    printf("\n=== TAKEAWAY CHARGE ===\n");
-                                    printf("Current rate: %.2f%%\n", S.policy.takeawayRate);
-
-                                    printf("Enter new takeaway rate (0-100): ");
-                                    if (scanf("%lf", &rate) != 1 ||
-                                        !isfinite(rate) || rate < 0 || rate > 100) {
-                                        printf("Invalid rate!\n");
-                                        while (getchar() != '\n');
-                                        break;
-                                    }
-
-                                    S.policy.takeawayRate = rate;
-                                    printf("Takeaway charge updated successfully!\n");
-                                    break;
-
-                                case 3:
-                                    printf("\n=== DELIVERY CHARGE ===\n");
-                                    printf("Current base fee: %.2f\n", S.policy.deliveryBase);
-                                    printf("Current fee per km: %.2f\n", S.policy.deliveryPerKm);
-
-                                    printf("Enter new delivery base fee: ");
-                                    if (scanf("%lf", &baseFee) != 1 ||
-                                        !isfinite(baseFee) || baseFee < 0) {
-                                        printf("Invalid base fee!\n");
-                                        while (getchar() != '\n');
-                                        break;
-                                    }
-
-                                    printf("Enter new delivery fee per km: ");
-                                    if (scanf("%lf", &perKm) != 1 ||
-                                        !isfinite(perKm) || perKm < 0) {
-                                        printf("Invalid fee per km!\n");
-                                        while (getchar() != '\n');
-                                        break;
-                                    }
-
-                                    S.policy.deliveryBase = baseFee;
-                                    S.policy.deliveryPerKm = perKm;
-
-                                    printf("Delivery charge updated successfully!\n");
-                                    break;
-
-                                case 0:
-                                    break;
-                            }
-
-                            if (feof(stdin) || ferror(stdin)) return;
-
-                        } while (chargeChoice != 0);
-
-                        break;
-                    }
-                    break;
-                case 0: break;
+            if (!readInt("Choose: ", 0, 9, &choice)) {
+                return;
             }
 
-            if (feof(stdin) || ferror(stdin)) return;
+            switch (choice) {
+
+                case 1:
+                    createOrderTable(type, reservationID, tableID,
+                                     guests, distance);
+                    break;
+
+                case 2:
+                    addOrderFood(orderID, productID, quantity);
+                    break;
+
+                case 3:
+                    updateOrderFood(orderID, productID, newQuantity);
+                    break;
+
+                case 4:
+                    deleteOrderFood(orderID, productID);
+                    break;
+
+                case 5:
+                    showAllOrderTable();
+                    break;
+
+                case 6:
+                    listPreOrderedDishes(tableID);
+                    break;
+
+                case 7:
+                    checkoutOrder(orderID, discountRate, taxRate);
+                    break;
+
+                case 8:
+                    cancelOrder(orderID);
+                    break;
+
+                case 9:
+                    do {
+                        printf("\n=== CONFIGURE CHARGE POLICY ===\n");
+                        printf("1. Configure Dine-in Charge\n");
+                        printf("2. Configure Takeaway Charge\n");
+                        printf("3. Configure Delivery Charge\n");
+                        printf("0. Go back\n");
+
+                        if (!readInt("Choose: ", 0, 3, &chargeChoice)) {
+                            return;
+                        }
+
+                        switch (chargeChoice) {
+
+                            case 1:
+                                printf("\n=== DINE-IN CHARGE ===\n");
+                                printf("Current rate: %.2f%%\n",
+                                       S.policy.dineInRate);
+
+                                printf("Enter new dine-in rate (0-100): ");
+
+                                if (scanf("%lf", &rate) != 1 ||
+                                    !isfinite(rate) ||
+                                    rate < 0 || rate > 100) {
+                                    printf("Invalid rate!\n");
+                                    while (getchar() != '\n');
+                                    break;
+                                }
+
+                                S.policy.dineInRate = rate;
+                                printf("Dine-in charge updated successfully!\n");
+                                break;
+
+                            case 2:
+                                printf("\n=== TAKEAWAY CHARGE ===\n");
+                                printf("Current rate: %.2f%%\n",
+                                       S.policy.takeawayRate);
+
+                                printf("Enter new takeaway rate (0-100): ");
+
+                                if (scanf("%lf", &rate) != 1 ||
+                                    !isfinite(rate) ||
+                                    rate < 0 || rate > 100) {
+                                    printf("Invalid rate!\n");
+                                    while (getchar() != '\n');
+                                    break;
+                                }
+
+                                S.policy.takeawayRate = rate;
+                                printf("Takeaway charge updated successfully!\n");
+                                break;
+
+                            case 3:
+                                printf("\n=== DELIVERY CHARGE ===\n");
+                                printf("Current base fee: %.2f\n",
+                                       S.policy.deliveryBase);
+                                printf("Current fee per km: %.2f\n",
+                                       S.policy.deliveryPerKm);
+
+                                printf("Enter new delivery base fee: ");
+
+                                if (scanf("%lf", &baseFee) != 1 ||
+                                    !isfinite(baseFee) ||
+                                    baseFee < 0) {
+                                    printf("Invalid base fee!\n");
+                                    while (getchar() != '\n');
+                                    break;
+                                }
+
+                                printf("Enter new delivery fee per km: ");
+
+                                if (scanf("%lf", &perKm) != 1 ||
+                                    !isfinite(perKm) ||
+                                    perKm < 0) {
+                                    printf("Invalid fee per km!\n");
+                                    while (getchar() != '\n');
+                                    break;
+                                }
+
+                                S.policy.deliveryBase = baseFee;
+                                S.policy.deliveryPerKm = perKm;
+
+                                printf("Delivery charge updated successfully!\n");
+                                break;
+
+                            case 0:
+                                break;
+                        }
+
+                        if (feof(stdin) || ferror(stdin)) {
+                            return;
+                        }
+
+                    } while (chargeChoice != 0);
+
+                    break;
+
+                case 0:
+                    break;
+            }
+
+            if (feof(stdin) || ferror(stdin)) {
+                return;
+            }
 
         } while (choice != 0);
     }
+
+    // STAFF MENU
     else if (role == ROLE_STAFF)
     {
         do {
             printf("\n=== ORDER AND BILL MANAGEMENT ===\n");
             printf("1. Search orders\n");
-            printf("2. Show orders\n");
-            printf("3. Search bills\n");
-            printf("4. Show bills\n");
+            printf("2. show orders\n");
+            printf("3. print bills\n");
             printf("0. Go back\n");
 
-            if (!readInt("Choose: ", 0, 4, &choice)) return;
-
-            switch (choice) {
-                case 1: searchOrderMenu(); break;
-                case 2: showAllOrderTable(); break;
-                case 3: searchBillMenu(); break;
-                case 4: showBillList(); break;
-                case 0: break;
+            if (!readInt("Choose: ", 0, 4, &choice)) {
+                return;
             }
 
-            if (feof(stdin) || ferror(stdin)) return;
+            switch (choice) {
+
+                case 1:
+                    findOrderByID(&S, orderID);
+                    break;
+
+                case 2:
+                    showAllOrderTable();
+                    break;
+
+                case 3:
+                    printBillReport(orderID,discountRate,taxRate);
+                    break;
+
+                case 0:
+                    break;
+            }
+
+            if (feof(stdin) || ferror(stdin)) {
+                return;
+            }
 
         } while (choice != 0);
     }

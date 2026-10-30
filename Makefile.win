@@ -4,15 +4,15 @@
 CPP      = g++.exe -D__DEBUG__
 CC       = gcc.exe -D__DEBUG__
 WINDRES  = windres.exe
-OBJ      = main.o
-LINKOBJ  = main.o
-LIBS     = -L"D:/Dev-Cpp/TDM-GCC-64/lib" -L"D:/Dev-Cpp/TDM-GCC-64/x86_64-w64-mingw32/lib" -static-libgcc -g3
-INCS     = -I"D:/Dev-Cpp/TDM-GCC-64/include" -I"D:/Dev-Cpp/TDM-GCC-64/x86_64-w64-mingw32/include" -I"D:/Dev-Cpp/TDM-GCC-64/lib/gcc/x86_64-w64-mingw32/9.2.0/include"
-CXXINCS  = -I"D:/Dev-Cpp/TDM-GCC-64/include" -I"D:/Dev-Cpp/TDM-GCC-64/x86_64-w64-mingw32/include" -I"D:/Dev-Cpp/TDM-GCC-64/lib/gcc/x86_64-w64-mingw32/9.2.0/include" -I"D:/Dev-Cpp/TDM-GCC-64/lib/gcc/x86_64-w64-mingw32/9.2.0/include/c++"
+OBJ      = main.o Code/BillManager.o Code/FileHelper.o Code/Input.o Code/Login.o Code/menu.o Code/OrderManager.o Code/ProductManager.o Code/ReservationManager.o Code/TableManager.o
+LINKOBJ  = main.o Code/BillManager.o Code/FileHelper.o Code/Input.o Code/Login.o Code/menu.o Code/OrderManager.o Code/ProductManager.o Code/ReservationManager.o Code/TableManager.o
+LIBS     = -L"C:/Program Files (x86)/Embarcadero/Dev-Cpp/TDM-GCC-64/lib" -L"C:/Program Files (x86)/Embarcadero/Dev-Cpp/TDM-GCC-64/x86_64-w64-mingw32/lib" -static-libgcc -g3
+INCS     = -I"C:/Program Files (x86)/Embarcadero/Dev-Cpp/TDM-GCC-64/include" -I"C:/Program Files (x86)/Embarcadero/Dev-Cpp/TDM-GCC-64/x86_64-w64-mingw32/include" -I"C:/Program Files (x86)/Embarcadero/Dev-Cpp/TDM-GCC-64/lib/gcc/x86_64-w64-mingw32/9.2.0/include"
+CXXINCS  = -I"C:/Program Files (x86)/Embarcadero/Dev-Cpp/TDM-GCC-64/include" -I"C:/Program Files (x86)/Embarcadero/Dev-Cpp/TDM-GCC-64/x86_64-w64-mingw32/include" -I"C:/Program Files (x86)/Embarcadero/Dev-Cpp/TDM-GCC-64/lib/gcc/x86_64-w64-mingw32/9.2.0/include" -I"C:/Program Files (x86)/Embarcadero/Dev-Cpp/TDM-GCC-64/lib/gcc/x86_64-w64-mingw32/9.2.0/include/c++"
 BIN      = "RESTAURANT MENU & TABLE RESERVATION MANAGEMENT SYSTEM.exe"
-CXXFLAGS = $(CXXINCS) -g3 -g
-CFLAGS   = $(INCS) -g3 -g
-DEL      = D:\Dev-Cpp\devcpp.exe INTERNAL_DEL
+CXXFLAGS = $(CXXINCS) -g3
+CFLAGS   = $(INCS) -g3
+DEL      = C:\Program Files (x86)\Embarcadero\Dev-Cpp\DevCpp.exe INTERNAL_DEL
 
 .PHONY: all all-before all-after clean clean-custom
 
@@ -26,3 +26,30 @@ $(BIN): $(OBJ)
 
 main.o: main.c
 	$(CC) -c main.c -o main.o $(CFLAGS)
+
+Code/BillManager.o: Code/BillManager.c
+	$(CC) -c Code/BillManager.c -o Code/BillManager.o $(CFLAGS)
+
+Code/FileHelper.o: Code/FileHelper.c
+	$(CC) -c Code/FileHelper.c -o Code/FileHelper.o $(CFLAGS)
+
+Code/Input.o: Code/Input.c
+	$(CC) -c Code/Input.c -o Code/Input.o $(CFLAGS)
+
+Code/Login.o: Code/Login.c
+	$(CC) -c Code/Login.c -o Code/Login.o $(CFLAGS)
+
+Code/menu.o: Code/menu.c
+	$(CC) -c Code/menu.c -o Code/menu.o $(CFLAGS)
+
+Code/OrderManager.o: Code/OrderManager.c
+	$(CC) -c Code/OrderManager.c -o Code/OrderManager.o $(CFLAGS)
+
+Code/ProductManager.o: Code/ProductManager.c
+	$(CC) -c Code/ProductManager.c -o Code/ProductManager.o $(CFLAGS)
+
+Code/ReservationManager.o: Code/ReservationManager.c
+	$(CC) -c Code/ReservationManager.c -o Code/ReservationManager.o $(CFLAGS)
+
+Code/TableManager.o: Code/TableManager.c
+	$(CC) -c Code/TableManager.c -o Code/TableManager.o $(CFLAGS)

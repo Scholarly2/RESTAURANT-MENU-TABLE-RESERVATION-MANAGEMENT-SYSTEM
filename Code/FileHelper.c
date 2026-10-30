@@ -3,14 +3,15 @@
 #include <string.h>
 #include <math.h>
 #include <limits.h>
-#include "FileHelper.h"
-#include "RestaurantTypes.h"
-#include "Input.h"
-#include "common.h"
+#include "../Include_type_struct/FileHelper.h"
+#include "../Include_type_struct/RestaurantTypes.h"
+#include "../Include_type_struct/Input.h"
 #define ORDER_HISTORY_FILE "Data/OrderHistory.txt"
 #define BILL_HISTORY_FILE "Data/BillHistory.txt"
-
+#include <time.h>
 #define dataFile "products.txt"
+#include <ctype.h>
+
 
 int loadProducts(State *changing, const char *path)
 {
@@ -208,7 +209,7 @@ int saveProducts(const State *s, const char *path)
     for (i=0; i< s->productCount && success; i++)
     {
         const MenuItem *item = &s -> products[i];
-        if(fprinf(file, "p|%d|%s|%.2f|%d|%d|%d\n", 
+        if(fprintf(file, "p|%d|%s|%.2f|%d|%d|%d\n", 
                     item->productID,
                     item->productName,
                     item->productPrice,
@@ -225,10 +226,10 @@ int saveProducts(const State *s, const char *path)
     }
     return success;
 }
-int loadProduct(Product *list, int *count)
+int loadProduct(MenuItem *list, int *count)
 {
-    Product item;
-    char    line[LINE_SIZE];
+    MenuItem item;
+    char    line[NAME_SIZE];
     FILE   *f;
     int     n, i, isDuplicate;
 
@@ -241,19 +242,19 @@ int loadProduct(Product *list, int *count)
     }
 
     while (*count < MAX_PRODUCT && fgets(line, sizeof(line), f) != NULL) {
-        n = sscanf(line, "%9[^,],%49[^,],%d,%f,%d,%d",
+        n = sscanf(line, "%9[^,],%49[^,],%d,%lf,%d,%d",
                    item.productID, item.productName, &item.productType,
-                   &item.price, &item.status, &item.quantity);
+                   &item.productPrice, &item.productStatus, &item.quantity);
 
         if (n != 6) continue;
         if (item.productType < 1 || item.productType > 5) continue;
-        if (item.price < 0) continue;
-        if (item.status != 1 && item.status != 2) continue;
+        if (item.productPrice < 0) continue;
+        if (item.productStatus != 1 && item.productStatus != 2) continue;
         if (item.quantity < 0) continue;
 
         isDuplicate = FALSE;
         for (i = 0; i < *count; i++) {
-            if (strcmp(list[i].productID, item.productID) == 0) {
+            if (list[i].productID, item.productID == 0) {
                 isDuplicate = TRUE;
                 break;
             }
@@ -269,7 +270,7 @@ int loadProduct(Product *list, int *count)
     return TRUE;
 }
 
-int saveProduct(const Product *list, int count)
+int saveProduct(const MenuItem *list, int count)
 {
     FILE *f = fopen(PRODUCT_FILE, "w");
     int i;
@@ -280,21 +281,18 @@ int saveProduct(const Product *list, int count)
     }
 
     for (i = 0; i < count; i++) {
-        fprintf(f, "%s,%s,%d,%.2f,%d,%d\n",
+        fprintf(f, "%d,%s,%d,%.2f,%d,%d\n",
                 list[i].productID, list[i].productName, list[i].productType,
-                list[i].price, list[i].status, list[i].quantity);
+                list[i].productPrice, list[i].productStatus, list[i].quantity);
     }
 
     fclose(f);
     return TRUE;
 }
-
-int saveTransaction(void) { return TRUE; }  
-int saveBillReport(void)  { return TRUE; }  
-nt loadTransaction(State *changing, const char *path){
+int loadTransaction(State *changing, const char *path){
     FILE *file;
     ChargePolicy policy = {0};
-    char line[LINE_SIZE];
+    char line[NAME_SIZE];
     int version = 0, tableCount = 0, resCount = 0, orderCount = 0;
     int lastResID = 0, lastOrderID = 0;
     int i, j, type, status, preOrder;
@@ -493,7 +491,7 @@ int saveTransaction(const State *s, const char *path){
 int loadBillReport(State *changing, const char *path)
 {
     FILE *file;
-    char line[LINE_SIZE];
+    char line[NAME_SIZE];
     int version = 0, billCount = 0, lastBillID = 0;
     int i, j, type;
     int success = TRUE;

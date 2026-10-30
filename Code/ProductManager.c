@@ -11,14 +11,6 @@
 #include "../Include_type_struct/menu.h"
 #include "../Include_type_struct/Login.h"
 
-enum ProductUPDATE
-{
-    UP_Name = 1,
-    UP_PRICE,
-    UP_TYPE,
-    UP_QUANTITY,
-    UP_STATUS
-};
 
 //find product
 int findProductByID(const State *s, int id)
