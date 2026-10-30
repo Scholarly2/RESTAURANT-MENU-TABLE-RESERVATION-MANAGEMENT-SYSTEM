@@ -1,48 +1,12 @@
 #include <stdio.h>
-#include "Input.h"
-#include "TableManager.h"
-#include "ReservationManager.h"
-#include "OrderManager.h"
-#include "BillManager.h"
+#include <limits.h>
+#include "../Include_type_struct/Input.h"
+#include "../Include_type_struct/RestaurantTypes.h"
+#include "../Include_type_struct/menu.h"
+#include "../Include_type_struct/Login.h"
+#include "../Include_type_struct/FileHelper.h"
 
 /* ===================== HELPERS ===================== */
-
-int initializeTables(State *s)
-{
-    const int seats[] = {
-        2, 2, 2,       /* 3 tables with 2 seats */
-        4, 4, 4, 4,    /* 4 tables with 4 seats */
-        8, 8, 8        /* 3 tables with 8 seats */
-    };
-    const int count = (int)(sizeof(seats) / sizeof(seats[0]));
-    int i;
-
-    if (s == NULL || s->tableCount < 0 || s->tableCount > MAX_TABLES)
-        return FALSE;
-
-    /* Existing tables may already have reservations or open orders. */
-    if (s->tableCount > 0)
-        return TRUE;
-
-    /* Missing tables in an existing dataset require recovery, not seeding. */
-    if (s->resCount != 0 || s->orderCount != 0 || s->billCount != 0)
-        return FALSE;
-    if (count > MAX_TABLES)
-        return FALSE;
-
-    for (i = 0; i < count; i++) {
-        Table table = {0};
-        table.tableID = i + 1;
-        table.tableNumber = i + 1;
-        table.tableType = seats[i];
-        table.tableStatus = TABLE_AVAILABLE;
-        /* tableTypeID remains 0; current table lookup does not use it. */
-        s->tables[i] = table;
-    }
-
-    s->tableCount = count;
-    return TRUE;
-}
 
 const char *statusToString(int status)
 {
@@ -60,11 +24,11 @@ void showTables(const Table *tables, int tableCount)
 
     printf("%-8s | %-6s | %s\n", "Table", "Seats", "Status");
     for (i = 0; i < tableCount; i++) {
-        printf("%-8d | %-6d | %s\n",
-               tables[i].tableNumber,
-               tables[i].tableType,
-               statusToString(tables[i].tableStatus));
+        printf("| %-8d | %-7d | %-12s |\n", tables[i].tableNumber,
+               tables[i].tableType, statusToString(tables[i].tableStatus));
     }
+    puts("+----------+---------+--------------+");
+    if (tableCount == 0) puts("(no tables)");
 }
 
 int findTableByID(const State *s, int tableID)
@@ -189,6 +153,7 @@ int promptPayOrder(int orderIndex)
     double discount, tax;
     int    confirm;
     Bill   b;
+    int orderID;
 
     if (orderIndex < 0 || orderIndex >= S.orderCount) return FALSE;
 
@@ -198,7 +163,7 @@ int promptPayOrder(int orderIndex)
     if (!calculateBill(&S.orders[orderIndex], S.policy, discount, tax, &b)) {
         return FALSE;
     }
-    displayBillReport(&b);
+  	printBillReport(orderID, discount,tax);
 
     if (!readInt("Confirm payment 1 Yes 0 No: ", 0, 1, &confirm)) return FALSE;
     if (confirm == 0) return FALSE;
@@ -247,11 +212,11 @@ int updateStatusTable(int tableID, int newStatus)
 
         if (r == -1) return FALSE;
         if (newStatus == TABLE_SERVING) {
-            return checkInReservation(S.reservations[r].phoneNumber);
+            return CheckInReservation(S.reservations[r].phoneNumber);
         }
         if (!readInt("Cancel booking 1 Yes 0 No: ", 0, 1, &confirm)) return FALSE;
         if (confirm == 0) return FALSE;
-        return cancelReservation(S.reservations[r].reservationID);
+        return cancelReservation(S.reservations[r].phoneNumber);
     }
 
     /* oldStatus == TABLE_SERVING */
@@ -320,4 +285,46 @@ void sortTableByStatus(void)
         }
     }
     showTables(view, S.tableCount);
+}
+
+/* ======= MENU FOR TABLE MANAGER ========*/
+
+void TableMenu(void)
+{
+    int choice, tableID, option, guests, index, newStatus;
+
+    for (;;) {
+        puts("\n========== TABLE MANAGEMENT ==========");
+        puts("1. Show tables");
+        puts("2. Change table status");
+        puts("3. Find available table");
+        puts("4. Sort tables by status");
+        puts("0. Back");
+        if (!readInt("Choice: ", 0, 4, &choice) || choice == 0) return;
+
+        switch (choice) {
+        case 1:
+            showTables(S.tables, S.tableCount);
+            break;
+        case 2:
+            showTables(S.tables, S.tableCount);
+            if (!readInt("Table ID (0 Back): ", 0, INT_MAX, &tableID)) return;
+            if (tableID == 0) break;
+            if (findTableByID(&S, tableID) == -1) { puts("Table not found."); break; }
+            if (!readInt("New status (1 Available, 2 Booked, 3 Serving): ", 1, 3, &option)) return;
+            newStatus = option == 1 ? TABLE_AVAILABLE : (option == 2 ? TABLE_BOOKED : TABLE_SERVING);
+            puts(updateStatusTable(tableID, newStatus) ? "Table status updated."
+                                                       : "Table status was not changed.");
+            break;
+        case 3:
+            if (!readInt("Number of customers (1-8): ", 1, 8, &guests)) return;
+            index = findAvailableTable(&S, guests);
+            if (index < 0 || index >= S.tableCount) puts("No suitable table available.");
+            else showTables(&S.tables[index], 1);
+            break;
+        case 4:
+            sortTableByStatus();
+            break;
+        }
+    }
 }

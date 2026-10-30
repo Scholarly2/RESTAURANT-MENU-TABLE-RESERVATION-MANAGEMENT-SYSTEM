@@ -1,8 +1,33 @@
 #include <stdio.h>
 #include <math.h>
-#include <RestaurantTypes.h>
+#include "../Include_type_struct/RestaurantTypes.h"
 #include <time.h>
+#include <stdlib.h>
+#include "../Include_type_struct/FileHelper.h"
 
+State *copyState(const State *s)
+{
+    State *copy;
+
+    if (s == NULL) {
+        return NULL;
+    }
+
+    copy = (State *)malloc(sizeof(State));
+
+    if (copy == NULL) {
+        return NULL;
+    }
+
+    *copy = *s;
+
+    return copy;
+}
+
+double roundMoney(double value)
+{
+    return round(value * 100.0) / 100.0;
+}
 int calculateOrderTotal(const Order *order, double *total){
     //check cac gia tri nhap vao
     if(total == NULL || order == NULL || order->itemCount < 0 || order->itemCount > MAX_ITEMS){
@@ -59,7 +84,7 @@ int applyDineInCharge(double subtotal, double rate, double *fee){
     }
 
     //kiem tra rate truoc khi bat dau tinh toan
-    if(!isfinite(rate) < 0 || rate > 100){
+    if(!isfinite(rate) || rate < 0 || rate > 100){
         return FALSE;
     }
 
@@ -76,7 +101,7 @@ int applyTakeawayCharge(double subtotal, double rate, double *fee){
     }
 
     //kiem tra rate truoc khi bat dau tinh toan
-    if(!isfinite(rate) < 0 || rate > 100){
+    if(!isfinite(rate) || rate < 0 || rate > 100){
         return FALSE;
     }
 
@@ -102,8 +127,8 @@ int applyDeliveryCharge(double distance, double baseFee, double perKm, double *f
 
     //kiem tra gia tri value
 
-    if( !isfinite(value) || value > MAX_MONEY){
-        return  FALSE;
+    if(!isfinite(perKm) || perKm < 0 || perKm > MAX_MONEY){
+        return FALSE;
     }
 
     *fee = roundMoney(value);
@@ -138,11 +163,13 @@ int calculateBill(const Order *order, ChargePolicy policy, double discountRate, 
     }
 
     //tinh tong tien cuoi cung
-    bill->subtotal = subtotal;
-    bill->serviceCharge = serviceCharge;
+    bill->totalMoney = subtotal;
+    bill->surcharge = serviceCharge;
+    bill->discountRate = discountRate;
     bill->discount = discount;
+    bill->taxRate = taxRate;
     bill->tax = tax;
-    bill->total = total;
+    bill->amountDue = total;
 
     return TRUE;
 }
@@ -172,7 +199,7 @@ int printBillReport(int orderID, double discountRate, double taxRate){
     }
     printf("Subtotal: %.2f\n", bill.totalMoney);
     printf("Service charge: %.2f\n", bill.surcharge);
-    printf("Discount: %.2f\n", bil.discount);
+    printf("Discount: %.2f\n", bill.discount);
     printf("Tax: %.2f\n", bill.tax);
     printf("Amount due: %.2f\n", bill.amountDue);
 
@@ -196,14 +223,82 @@ int checkoutOrder(int orderID, double discountRate, double taxRate){
 
     //luu hoa don vao bo nho
     if(S.billCount >= MAX_BILLS){
+        printf("Bill storage is full.\n");
         return FALSE;
     }
-    S.bills[S.billCount] = bill;
-    S.billCount++;
-    // cap nhat trang thai order thanh ORDER_PAID
-    S.orders[findOrderIndexByID].orderStatus = ORDER_PAID;
-    return TRUE;
 
-    //in hoa don
-    return printBillReport(orderID, discountRate, taxRate);
+    State *copy = copyState(&S);
+
+    if(copy == NULL){
+        return FALSE;
+    }
+    // tao hoa don
+    Bill bill = {0};
+
+    Order *order = &copy->orders[findOrderIndexByID];
+
+    if(!calculateBill(order, copy->policy, discountRate, taxRate, &bill)){
+        free(copy);
+        return FALSE;
+    }
+
+    //lay thoi gian
+    time_t currentTime = time(NULL);
+    struct tm *timeInfo = localtime(&currentTime);
+
+    if(timeInfo == NULL){
+        free(copy);
+        return FALSE;
+    }
+
+    bill.timeBill.year = timeInfo->tm_year + 1900;
+    bill.timeBill.month = timeInfo->tm_mon + 1;
+    bill.timeBill.day = timeInfo->tm_mday;
+    bill.timeBill.hour = timeInfo->tm_hour;
+    bill.timeBill.minute = timeInfo->tm_min;
+
+    // gan thong tin hoa don
+    bill.billID = copy->lastBillID + 1;
+    bill.orderID = order->orderID;
+    bill.tableID = order->tableID;
+    bill.orderType = order->orderType;
+    bill.itemCount = order->itemCount;
+    bill.deliveryDistance = order->deliveryDistance;
+    bill.policySnapshot = copy->policy;
+
+    // copy danh sach mon an
+    for(int i = 0; i < order->itemCount; i++){
+        bill.items[i] = order->items[i];
+    }
+
+    // luu hoa don vao bo nho
+    copy->bills[copy->billCount] = bill;
+    copy->billCount++;
+    copy->lastBillID = bill.billID;
+
+    // cap nhat trang thai order thanh ORDER_PAID
+    order->orderStatus = ORDER_PAID;
+
+    // luu Order
+    if(!saveTransaction(copy, "Data/OrderHistory.txt")){
+        free(copy);
+        printf("Cannot save order history.\n");
+        return FALSE;
+    }
+
+    // luu Bill
+    if(!saveTransaction(copy, "Data/OrderHistory.txt")){
+        free(copy);
+        printf("Cannot save order history.\n");
+        return FALSE;
+    }
+
+    // cap nhat State
+    S = *copy;
+    free(copy);
+
+    // in hoa don
+    printf("Checkout successfully.\n");
+
+    return TRUE;
 }
