@@ -1,5 +1,5 @@
-#ifndef RESTAURANT_MENU_H
-#define RESTAURANT_MENU_H
+#ifndef MENU_H
+#define MENU_H
 
 #include <stdio.h>
 #include "Input.h"
@@ -10,3 +10,5 @@ void OrderMenu(int role);
 void ProductMenu(int role);
 void ReservationMenu();
 void TableMenu();
+ 
+#endif
