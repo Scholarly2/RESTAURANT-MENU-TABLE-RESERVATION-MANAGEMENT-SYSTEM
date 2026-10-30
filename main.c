@@ -82,6 +82,8 @@ int main(void)
         return EXIT_FAILURE;
     }
 
+<<<<<<<<< Temporary merge branch 1
+=========
     if (!loadProducts(&S, PRODUCT_FILE))
 {
     printf("Failed to load product data!\n");
@@ -90,6 +92,7 @@ else
 {
     printf("Total products: %d\n", S.productCount);
 }
+>>>>>>>>> Temporary merge branch 2
 
     do {
         int role = accounts[currentAccount].role;

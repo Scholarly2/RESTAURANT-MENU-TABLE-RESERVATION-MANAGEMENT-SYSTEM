@@ -9,6 +9,10 @@
 #define ORDER_HISTORY_FILE "Data/OrderHistory.txt"
 #define BILL_HISTORY_FILE "Data/BillHistory.txt"
 #include <time.h>
+<<<<<<<<< Temporary merge branch 1
+#define dataFile "../Data/products.txt"
+=========
+>>>>>>>>> Temporary merge branch 2
 #include <ctype.h>
 
 
@@ -46,10 +50,17 @@ if (file == NULL)
     
     if (sscanf(line, "PRODUCT|%15[^|]|%15[^|]|%15[^\r\n]%n",
            versionText, countText, lastIDText, &used) != 3)
+<<<<<<<<< Temporary merge branch 1
+{
+    fclose(file);
+    return FALSE;
+}
+=========
 	{
     fclose(file);
     return FALSE;
 	}
+>>>>>>>>> Temporary merge branch 2
     
     if (used == 0 || strspn(line + used, "\r\n") != strlen(line + used))
     {
@@ -72,6 +83,15 @@ if (file == NULL)
         }
 
         used = 0;
+<<<<<<<<< Temporary merge branch 1
+        if (sscanf(line, "%31[^|]|%99[^|]|%15[^|]|%63[^|]|%31[^|]|%31[^\r\n]%n",
+           idText, name, typeText, priceText,
+           quantityText, statusText, &used) != 6)
+{
+    fclose(file);
+    return FALSE;
+}
+=========
         if (sscanf(line,
     	"p|%31[^|]|%99[^|]|%63[^|]|%15[^|]|%31[^|]|%31[^\r\n]%n",
     	idText, name, priceText, typeText,
@@ -80,6 +100,7 @@ if (file == NULL)
     	fclose(file);
    		 return FALSE;
 		}
+>>>>>>>>> Temporary merge branch 2
 
         if (used == 0 || strspn(line + used, "\r\n") != strlen(line + used))
         {
