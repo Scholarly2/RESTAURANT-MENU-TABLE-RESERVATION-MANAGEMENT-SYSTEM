@@ -7,10 +7,13 @@
 
 /* ===================== HELPERS ===================== */
 
-int initializeTables(State *s);
 int initializeTables(State *s)
 {
-    const int seats[] = {2, 2, 4, 4, 8, 8};
+    const int seats[] = {
+        2, 2, 2,       /* 3 tables with 2 seats */
+        4, 4, 4, 4,    /* 4 tables with 4 seats */
+        8, 8, 8        /* 3 tables with 8 seats */
+    };
     const int count = (int)(sizeof(seats) / sizeof(seats[0]));
     int i;
 
