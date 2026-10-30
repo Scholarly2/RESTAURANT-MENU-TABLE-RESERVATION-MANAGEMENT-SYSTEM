@@ -1,5 +1,4 @@
 #include <stdio.h>
-#include "common.h"
 #include "Input.h"
 #include "TableManager.h"
 #include "ReservationManager.h"
