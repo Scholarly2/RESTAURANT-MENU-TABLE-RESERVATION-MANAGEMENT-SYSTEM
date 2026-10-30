@@ -3,10 +3,13 @@
 #include <string.h>
 #include <math.h>
 #include <limits.h>
-#include "FileHelper.h"
-#include "RestaurantTypes.h"
-#include "Input.h"
-#include "common.h"
+#include "../Include_type_struct/FileHelper.h"
+#include "../Include_type_struct/RestaurantTypes.h"
+#include "../Include_type_struct/Input.h"
+#define ORDER_HISTORY_FILE "Data/OrderHistory.txt"
+#define BILL_HISTORY_FILE "Data/BillHistory.txt"
+#include <time.h>
+#include <ctype.h>
 
 
 int loadProducts(State *changing, const char *path)
@@ -32,6 +35,7 @@ if (file == NULL)
     perror("fopen");
     return FALSE;
 }
+
     if (fgets(line, sizeof(line), file) == NULL)
     {
         fclose(file);
@@ -225,12 +229,12 @@ int saveProducts(const State *s, const char *path)
 
     printf("Opening product file for writing: %s\n", path);
 
-        file = fopen(path, "w");
-            if (file == NULL)
-        {
-         perror("Cannot open product file for writing");
-                    return FALSE;
-        }
+file = fopen(path, "w");
+if (file == NULL)
+{
+    perror("Cannot open product file for writing");
+    return FALSE;
+}
 
     if(fprintf(file, "PRODUCT|2|%d|%d\n", s->productCount, s->lastProductID) < 0)
     {
