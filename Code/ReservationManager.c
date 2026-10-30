@@ -315,45 +315,156 @@ void printReservation(void){
                status);
     }
 }
-int showReservationMenu(int role){
-    int role;
+void ReservationMenu(int role){
+    int choice;
     if (S.resCount<0||S.resCount>MAX_RESERVATIONS){
         puts("Invalid reservation data. Load a valid reservation first.");
         return;
     }
     if (role== ROLE_MANAGER){
         do {
-            printf("\n=== RESERVATION MANAGEMENT ===");
-            printf("1. Create reservation");
-            printf("2. Cancel reservation");
-            printf("3. Sort Booking reservation and print");
-            printf("4. CheckIn reservation");
-            printf("0. go back");
+            printf("\n=== RESERVATION MANAGEMENT ===\n");
+            printf("1. Create reservation\n");
+            printf("2. Cancel reservation\n");
+            printf("3. Sort Booking reservation and print\n");
+            printf("4. CheckIn reservation\n");
+            printf("0. go back\n");
             if (!readInt("Choose: ",0,4,&choice)) return;
-            switch (choice){
-                case 1: createReservation(); break;
-                case 2: cancelReservation(); break;
-                case 3: sortBookingByTime() printReservation(); break;
-                case 4: CheckInReservation(); break;
-                case 0: break;
-            }
+		switch (choice) {
+		    case 1:
+		    {
+		        char nameCustomer[100];
+		        char phoneNumber[20];
+		        int NumberCustomer;
+		        DateTime timeBooking;
+		        int tableType;
+		        int requestedTableID=0;
+		    printf("Enter customer phone number:");
+			scanf("%19s",phoneNumber);
+			printf("Enter name Customer:");
+			scanf(" %19[^\n]",nameCustomer);
+			printf("Number of customer:");
+			scanf("%d",&NumberCustomer);
+			printf("Enter booking year: ");
+            scanf("%d", &timeBooking.year);
+            printf("Enter booking month: ");
+            scanf("%d", &timeBooking.month);
+            printf("Enter booking day: ");
+            scanf("%d", &timeBooking.day);
+            printf("Enter booking hour: ");
+            scanf("%d", &timeBooking.hour);
+            printf("Enter booking minute: ");
+        	scanf("%d", &timeBooking.minute);
+        	 if (NumberCustomer <= 2)
+        tableType = 2;
+    else if (NumberCustomer <= 4)
+        tableType = 4;
+    else
+        tableType = 8;
+		        // Nhập thông tin khách hàng và đặt bàn tại đây
+		        createReservation(nameCustomer, phoneNumber,
+		                          NumberCustomer, timeBooking,
+		                          tableType, requestedTableID);
+		        break;
+		    }
+		
+		    case 2:
+		    {
+		        char phoneNumber[20];
+		
+		        printf("Enter customer phone number: ");
+		        scanf("%19s", phoneNumber);
+		
+		        cancelReservation(phoneNumber);
+		        break;
+		    }
+		
+		    case 3:
+		        sortBookingByTime();
+		        printReservation();
+		        break;
+		
+		    case 4:
+		    {
+		        char phoneNumber[20];
+		
+		        printf("Enter customer phone number: ");
+		        scanf("%19s", phoneNumber);
+		
+		        CheckInReservation(phoneNumber);
+		        break;
+		    }
+		
+		    case 0:
+		        break;
+		}
             if (feof(stdin)||ferror(stdin)) return;
         } while (choice!=0);
+    }
         else{
             do{
-                printf("\n=== RESERVATION MANAGEMENT ===");
-                printf("1. Create reservation");
-                printf("2. Cancel reservation");
-                printf("3. CheckIN reservation");
-                printf("0. go back");
+                printf("\n=== RESERVATION MANAGEMENT ===\n");
+                printf("1. Create reservation\n");
+                printf("2. Cancel reservation\n");
+                printf("3. CheckIN reservation\n");
+                printf("0. go back\n");
                 if (!readInt("Choose:",0,3,&choice)) return;
                 switch(choice){
-                    case 1: createReservation(); break;
-                    case 2: cancelReservation(); break;
-                    case 3: checkInReservation(); break;
-                    case 0: break;
+			case 1: {
+			    char nameCustomer[100];
+			    char phoneNumber[20];
+			    int NumberCustomer;
+			    DateTime timeBooking;
+			    int tableType;
+			    int requestedTableID;
+			printf("Enter customer phone number:");
+			scanf("%19s",phoneNumber);
+			printf("Enter name Customer:\n");
+			scanf(" %19[^\n]",nameCustomer);
+			printf("Number of customer:\n");
+			scanf("%d",&NumberCustomer);
+			printf("Enter booking year: \n");
+            scanf("%d", &timeBooking.year);
+            printf("Enter booking month: \n");
+            scanf("%d", &timeBooking.month);
+            printf("Enter booking day: \n");
+            scanf("%d", &timeBooking.day);
+            printf("Enter booking hour: \n");
+            scanf("%d", &timeBooking.hour);
+            printf("Enter booking minute: \n");
+        	scanf("%d", &timeBooking.minute);
+        	        	 if (NumberCustomer <= 2)
+        tableType = 2;
+    else if (NumberCustomer <= 4)
+        tableType = 4;
+    else
+        tableType = 8;
+			    // Nhập thông tin trước khi gọi hàm
+			    createReservation(nameCustomer, phoneNumber,
+			                      NumberCustomer, timeBooking,
+			                      tableType, requestedTableID);
+			    break;
+			}
+			
+			case 2: {
+			    char phoneNumber[20];
+			    printf("Enter customer phone number: ");
+			    scanf("%19s", phoneNumber);
+			    cancelReservation(phoneNumber);
+			    break;
+			}
+			
+			case 3: {
+			    char phoneNumber[20];
+			    printf("Enter customer phone number: ");
+			    scanf("%19s", phoneNumber);
+			    CheckInReservation(phoneNumber);
+			    break;
+			}
+			
+			case 0: break;
                 }
                 if (feof(stdin)||ferror(stdin)) return;
             } while (choice !=0);
         }
-    }
+}
