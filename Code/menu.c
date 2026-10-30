@@ -1,513 +1,544 @@
 #include <stdio.h>
-#include <string.h>
 #include <limits.h>
-#include "FileHelper.h"
+
+#include "RestaurantTypes.h"
 #include "Input.h"
 #include "Login.h"
 #include "menu.h"
-#include "RestaurantTypes.h"
 
-Account *menuAccount = NULL;
+/* ===================== role-aware menu engine ===================== */
 
-#define MENU_WIDTH 52
+#define MENU_BACK        0
+#define MENU_EOF         (-1)
+#define MENU_MAX_ENTRIES 16
+#define MENU_COUNT(a)    ((int)(sizeof(a) / sizeof((a)[0])))
 
-#ifndef ARRAY_SIZE
-#define ARRAY_SIZE(a) ((int)(sizeof(a) / sizeof((a)[0])))
-#endif
+typedef struct {
+    const char *label;
+    int action;        /* id handled by the switch of the owning menu (> 0) */
+    int managerOnly;   /* TRUE: hidden from staff */
+} MenuEntry;
 
-static const char *const MAIN_ITEMS[] = {
-    "Menu Item Management", "Table Management", "Table Reservation",
-    "Ordering & Billing", "Accounts & Passwords"
-};
-static const char *const PRODUCT_ITEMS[] = {
-    "Add new item", "Update item", "Delete item (set unavailable)",
-    "Search products", "View and sort products"
-};
-static const char *const TABLE_ITEMS[] = {
-    "Show tables", "Change table status", "Find available table", "Sort tables by status"
-};
-static const char *const RESERVATION_ITEMS[] = {
-    "Create reservation", "Cancel reservation", "Sort booking by time", "Check in"
-};
-static const char *const ORDER_ITEMS[] = {
-    "Create order", "Add food", "Update food", "Delete food",
-    "View order items", "Pre-orders by table", "Pay", "Cancel order",
-    "Fee settings", "Order list / history", "Paid bills"
-};
-static const char *const ACCOUNT_ITEMS[] = {
-    "Create staff account", "Change account role", "View account list",
-    "Change my password", "View account list and passwords"
-};
-
-// ===================== DRAWING HELPERS =====================
-
-static void printBorder(char fill)
+static int menuIsValidRole(int role)
 {
-    int i;
-    putchar('+');
-    for (i = 0; i < MENU_WIDTH - 2; i++) putchar(fill);
-    printf("+\n");
+    return role == ROLE_MANAGER || role == ROLE_STAFF;
 }
 
-static void printCentered(const char *text)
+static int menuReadChoice(int min, int max, int *choice)
 {
-    int inner = MENU_WIDTH - 2;
-    int len = (int)strlen(text);
-    int left, right;
-    if (len > inner) len = inner;
-    left = (inner - len) / 2;
-    right = inner - len - left;
-    printf("|%*s%.*s%*s|\n", left, "", len, text, right, "");
-}
-
-static void printMenuItem(int number, const char *label)
-{
-    char num[8];
-    int labelWidth = MENU_WIDTH - 2 - 6;
-    snprintf(num, sizeof(num), "%d.", number);
-    printf("|  %-4s%-*.*s|\n", num, labelWidth, labelWidth, label);
-}
-
-// SỬA: Kiểm tra theo cả module và lựa chọn; cùng số 1 nhưng mỗi menu có quyền khác nhau.
-// checkPermission(role, choice) in Login.c checks main-menu choices only.
-// module 0: menu chính; 1..4: nghiệp vụ; 5: tài khoản.
-static int isMenuChoiceAllowed(int module, int choice, int role)
-{
-    int maxChoice;
-
-    if (role != ROLE_MANAGER && role != ROLE_STAFF) return FALSE;
-    switch (module) {
-    case 0: maxChoice = ARRAY_SIZE(MAIN_ITEMS); break;
-    case 1: maxChoice = ARRAY_SIZE(PRODUCT_ITEMS); break;
-    case 2: maxChoice = ARRAY_SIZE(TABLE_ITEMS); break;
-    case 3: maxChoice = ARRAY_SIZE(RESERVATION_ITEMS); break;
-    case 4: maxChoice = ARRAY_SIZE(ORDER_ITEMS); break;
-    case 5: maxChoice = ARRAY_SIZE(ACCOUNT_ITEMS); break;
-    default: return FALSE;
-    }
-    if (choice < 0 || choice > maxChoice) return FALSE;
-    if (choice == 0) return TRUE;
-    if (role == ROLE_MANAGER) return TRUE;
-
-    switch (module) {
-    case 0: return choice >= 1 && choice <= 4;
-    case 1: return choice >= 4 && choice <= ARRAY_SIZE(PRODUCT_ITEMS);
-    case 2: return choice >= 1 && choice <= ARRAY_SIZE(TABLE_ITEMS);
-    case 3: return choice >= 1 && choice <= ARRAY_SIZE(RESERVATION_ITEMS);
-    case 4: return choice >= 1 && choice <= ARRAY_SIZE(ORDER_ITEMS) && choice != 10;
-    default: return FALSE;
-    }
-}
-
-static void printMenu(const char *title, const char *const items[], int itemCount,
-                      const char *zeroLabel, int module, int role)
-{
-    int i;
-    printf("\n");
-    printBorder('=');
-    printCentered(title);
-    printBorder('=');
-    for (i = 0; i < itemCount; i++) {
-        // SỬA: Ẩn mục bị cấm nhưng giữ nguyên số lựa chọn cho cả hai role.
-        if (isMenuChoiceAllowed(module, i + 1, role)) printMenuItem(i + 1, items[i]);
-    }
-    printBorder('-');
-    printMenuItem(0, zeroLabel);
-    printBorder('=');
-}
-
-// ===================== SMALL INPUT / OUTPUT HELPERS =====================
-
-static void report(int ok, const char *success, const char *failure)
-{
-    printf("%s\n", ok ? success : failure);
-}
-
-static const char *orderTypeName(int type)
-{
-    switch (type) {
-    case DINE_IN: return "Dine-in";
-    case TAKEAWAY: return "Takeaway";
-    case DELIVERY: return "Delivery";
-    default: return "Unknown";
-    }
-}
-
-static int readTableID(const char *prompt, int *tableID)
-{
-    int index;
-    *tableID = 0;
-    if (S.tableCount == 0) {
-        puts("No table in the system.");
-        return TRUE;
-    }
-    for (;;) {
-        if (!readInt(prompt, 0, INT_MAX, tableID)) return FALSE;
-        if (*tableID == 0) return TRUE;
-        // SỬA: Header có findTableByID, không có findTableByNumber; nhập đúng tableID.
-        index = findTableByID(&S, *tableID);
-        if (index >= 0 && index < S.tableCount) return TRUE;
-        puts("Table not found. Please enter another ID.");
-    }
-}
-
-// Ask for an order ID and find it. FALSE only on end of input.
-// SỬA: Chỉ chọn đơn OPEN; nhập lại ID không tồn tại/đơn đã đóng.
-// *index = -1 khi chọn 0 quay lại hoặc không có đơn OPEN.
-static int askOrderIndex(int *orderID, int *index)
-{
-    int i;
-    *orderID = 0;
-    *index = -1;
-    for (i = 0; i < S.orderCount; i++) {
-        if (S.orders[i].orderStatus == ORDER_OPEN) break;
-    }
-    if (i == S.orderCount) {
-        puts("No open orders.");
-        return TRUE;
-    }
-    for (;;) {
-        if (!readInt("Open order ID (0 Back): ", 0, INT_MAX, orderID)) return FALSE;
-        if (*orderID == 0) return TRUE;
-        i = findOrderByID(&S, *orderID);
-        if (i >= 0 && i < S.orderCount && S.orders[i].orderStatus == ORDER_OPEN) {
-            *index = i;
-            return TRUE;
+    while (!readInt("Choose: ", min, max, choice)) {
+        if (feof(stdin) || ferror(stdin)) {
+            return FALSE;
         }
-        puts("Open order not found. Please enter another ID.");
     }
-}
-
-// ===================== MODULE 2: TABLES =====================
-
-static int changeTableStatus(void)
-{
-    int tableID, index, choice, newStatus;
-    showTables(S.tables, S.tableCount);
-    if (!readTableID("Table ID (0 Back): ", &tableID)) return FALSE;
-    if (tableID == 0) return TRUE;
-    index = findTableByID(&S, tableID);
-    if (index < 0 || index >= S.tableCount) return TRUE;
-
-    // SỬA: Dùng showTables đã khai báo, bỏ statusToString chưa có trong header.
-    showTables(&S.tables[index], 1);
-    if (!readInt("New status (1 Available, 2 Booked, 3 Serving): ", 1, 3, &choice)) return FALSE;
-    newStatus = choice == 1 ? TABLE_AVAILABLE : (choice == 2 ? TABLE_BOOKED : TABLE_SERVING);
-    report(updateStatusTable(tableID, newStatus), "Table status updated.", "Table status was not changed.");
     return TRUE;
 }
 
-// ===================== MODULE 4: ORDERS & BILLING =====================
-
-static void listOrders(int role)
+static int menuPick(const char *title, const MenuEntry *entries, int count, int role)
 {
-    if (role != ROLE_MANAGER) {
-        puts("Permission denied. Manager access is required.");
-        return;
-    }
-    showAllOrderTable();
-}
-
-static void listPaidBills(void)
-{
+    int visible[MENU_MAX_ENTRIES];
+    int shown = 0;
+    int choice;
     int i;
-    // SỬA: Staff vẫn được xem hóa đơn đã thanh toán theo yêu cầu "còn lại full quyền".
-    printf("%-6s | %-6s | %-9s | %s\n", "Bill", "Order", "Type", "Amount due");
-    for (i = 0; i < S.billCount; i++) {
-        if (S.bills[i].billID <= 0) continue; // billID 0 = demo (report 3.8)
-        printf("%-6d | %-6d | %-9s | %.2f\n", S.bills[i].billID, S.bills[i].orderID,
-               orderTypeName(S.bills[i].orderType), S.bills[i].amountDue);
-    }
-}
 
-static int feeSettings(void)
-{
-    ChargePolicy p = S.policy;
-    printf("Current: dine-in %.2f%%, takeaway %.2f%%, delivery %.2f + %.2f per km\n",
-           p.dineInRate, p.takeawayRate, p.deliveryBase, p.deliveryPerKm);
-    if (!readDouble("Dine-in rate percent: ", 0, 100, &p.dineInRate) ||
-        !readDouble("Takeaway rate percent: ", 0, 100, &p.takeawayRate) ||
-        !readDouble("Delivery base fee: ", 0, MAX_PRICE, &p.deliveryBase) ||
-        !readDouble("Delivery fee per km: ", 0, MAX_PRICE, &p.deliveryPerKm)) return FALSE;
-    // SỬA: Gọi hàm nghiệp vụ đã khai báo; không malloc/copyState trong menu.
-    report(configureCharges(p), "Fee settings saved.", "Cannot save fee settings.");
-    return TRUE;
-}
-
-// ===================== ACTIONS DECLARED IN menu.h =====================
-// menu.h contains declarations; menu.c implements navigation once.
-// Login.c owns printMenuByRole() and the main-menu checkPermission().
-
-int runAction(int module, int choice)
-{
-    if (S.productCount < 0 || S.productCount > MAX_PRODUCT ||
-        S.tableCount < 0 || S.tableCount > MAX_TABLES ||
-        S.resCount < 0 || S.resCount > MAX_RESERVATIONS ||
-        S.orderCount < 0 || S.orderCount > MAX_ORDERS ||
-        S.billCount < 0 || S.billCount > MAX_BILLS) {
-        puts("Invalid restaurant data.");
-        return FALSE;
-    }
-    switch (module) {
-    case 1: return runProductAction(choice);
-    case 2: return runTableAction(choice);
-    case 3: return runReservationAction(choice);
-    case 4: return runOrderAction(choice);
-    default: return FALSE;
-    }
-}
-
-int runProductAction(int choice)
-{
-    int role = menuAccount != NULL ? menuAccount->role : 0;
-    if (role != ROLE_MANAGER && role != ROLE_STAFF) {
-        puts("Please log in with a valid account first.");
-        return FALSE;
-    }
-    if (!isMenuChoiceAllowed(1, choice, role)) {
-        puts("Permission denied or invalid choice.");
-        return TRUE;
-    }
-    switch (choice) {
-    case 1: addProduct(); break;
-    case 2: updateProduct(); break;
-    case 3: deleteProduct(); break;
-    case 4: if (!searchProductMenu()) return FALSE; break;
-    case 5: if (!showProductListMenu()) return FALSE; break;
-    }
-    return !(feof(stdin) || ferror(stdin));
-}
-
-int runTableAction(int choice)
-{
-    int role = menuAccount != NULL ? menuAccount->role : 0;
-    int guests, index;
-
-    if (role != ROLE_MANAGER && role != ROLE_STAFF) {
-        puts("Please log in with a valid account first.");
-        return FALSE;
-    }
-    if (!isMenuChoiceAllowed(2, choice, role)) {
-        puts("Permission denied or invalid choice.");
-        return TRUE;
-    }
-    switch (choice) {
-    case 1: showTables(S.tables, S.tableCount); break;
-    case 2: if (!changeTableStatus()) return FALSE; break;
-    case 3:
-        if (!readInt("Number of customers (1-8): ", 1, 8, &guests)) return FALSE;
-        index = findAvailableTable(&S, guests);
-        // SỬA: findAvailableTable trả INDEX, không phải tableID.
-        if (index < 0 || index >= S.tableCount) puts("No suitable table available.");
-        else showTables(&S.tables[index], 1);
-        break;
-    case 4: sortTableByStatus(); break;
-    }
-
-    return !(feof(stdin) || ferror(stdin));
-}
-
-int runReservationAction(int choice)
-{
-    int role = menuAccount != NULL ? menuAccount->role : 0;
-    char name[CUSTOMER_NAME_SIZE], phone[PHONE_SIZE];
-    int guests, tableType, tableID, index, confirm;
-    DateTime bookingTime;
-
-    if (role != ROLE_MANAGER && role != ROLE_STAFF) {
-        puts("Please log in with a valid account first.");
-        return FALSE;
-    }
-    if (!isMenuChoiceAllowed(3, choice, role)) {
-        puts("Permission denied or invalid choice.");
-        return TRUE;
-    }
-    switch (choice) {
-    case 1:
-        // SỬA: Bỏ promptCreateReservation chưa khai báo; nhập rồi gọi createReservation.
-        if (!readName("Customer name: ", TRUE, name) || !readPhone(phone) ||
-            !readInt("Number of customers (1-8): ", 1, 8, &guests) ||
-            !readBookingTime(&bookingTime)) return FALSE;
-        tableType = guests <= 2 ? 2 : (guests <= 4 ? 4 : 8);
-        showTables(S.tables, S.tableCount);
-        for (;;) {
-            if (!readInt("Preferred table ID (0 Auto-select): ", 0, INT_MAX, &tableID)) return FALSE;
-            if (tableID == 0) break;
-            index = findTableByID(&S, tableID);
-            if (index >= 0 && index < S.tableCount &&
-                S.tables[index].tableStatus == TABLE_AVAILABLE &&
-                S.tables[index].tableType >= tableType) break;
-            puts("Choose an available table with enough seats.");
+    printf("\n=== %s ===\n", title);
+    for (i = 0; i < count && shown < MENU_MAX_ENTRIES; i++) {
+        if (entries[i].managerOnly && role != ROLE_MANAGER) {
+            continue;
         }
-        report(createReservation(name, phone, guests, bookingTime, tableType, tableID),
-               "Reservation created.", "Cannot create reservation.");
-        break;
-    case 2:
-        // SỬA: cancelReservation nhận const char *phoneNumber, không nhận ID.
-        if (!readPhone(phone)) return FALSE;
-        if (!readInt("Confirm cancellation (1 Yes, 0 No): ", 0, 1, &confirm)) return FALSE;
-        if (confirm) report(cancelReservation(phone), "Reservation cancelled.", "Cannot cancel reservation.");
-        break;
-    case 3: sortBookingByTime(); printReservation(); break;
-    case 4:
-        // SỬA: checkInReservation cũng nhận số điện thoại theo header mới.
-        if (!readPhone(phone)) return FALSE;
-        report(checkInReservation(phone), "Checked in.", "Cannot check in.");
-        break;
+        visible[shown++] = i;
+        printf("%d. %s\n", shown, entries[i].label);
     }
+    printf("0. Back\n");
 
-    return !(feof(stdin) || ferror(stdin));
+    if (!menuReadChoice(0, shown, &choice)) {
+        return MENU_EOF;
+    }
+    if (choice == 0) {
+        return MENU_BACK;
+    }
+    return entries[visible[choice - 1]].action;
 }
 
-int runOrderAction(int choice)
+/* 1-2 guests -> 2-seat table, 3-4 -> 4-seat, 5-8 -> 8-seat */
+static int menuTableTypeForGuests(int guests)
 {
-    int role = menuAccount != NULL ? menuAccount->role : 0;
-    int id, orderIndex, quantity, confirm;
-    double discount, tax;
-
-    if (role != ROLE_MANAGER && role != ROLE_STAFF) {
-        puts("Please log in with a valid account first.");
-        return FALSE;
-    }
-    if (!isMenuChoiceAllowed(4, choice, role)) {
-        puts("Permission denied or invalid choice.");
-        return TRUE;
-    }
-    switch (choice) {
-    /* Current OrderManager.c reads IDs/type/distance itself. Do not ask
-     * for those values a second time here. It replaces the zero arguments.
-     * updateOrderFood() reads its IDs, but uses the supplied quantity.
-     */
-    case 1:
-        report(createOrderTable(0, 0, 0, 0, 0),
-               "Order action completed.", "Cannot create or select order.");
-        break;
-    case 2:
-        report(addOrderFood(0, 0, 0), "Food action completed.", "Cannot add food.");
-        break;
-    case 3:
-        if (!readInt("New quantity: ", 1, MAX_QUANTITY, &quantity)) return FALSE;
-        report(updateOrderFood(0, 0, quantity), "Food action completed.", "Cannot update food.");
-        break;
-    case 4:
-        report(deleteOrderFood(0, 0), "Food action completed.", "Food was not removed.");
-        break;
-    case 5: // View items of an open order; closed orders belong to history.
-        if (!askOrderIndex(&id, &orderIndex)) return FALSE;
-        if (orderIndex != -1) showAllOrderFood(&S.orders[orderIndex]);
-        break;
-    case 6:
-        /* The companion OrderManager.c removes the unfiltered history print. */
-        listPreOrderedDishes(0);
-        break;
-    case 7: // Preview, then pay only after confirmation
-        if (!askOrderIndex(&id, &orderIndex)) return FALSE;
-        if (orderIndex == -1) break;
-        if (!readDouble("Discount percent: ", 0, 100, &discount) ||
-            !readDouble("Tax percent: ", 0, 100, &tax)) return FALSE;
-        if (!printBillReport(id, discount, tax)) {
-            puts("Cannot display the bill.");
-            break;
-        }
-        if (!readInt("Confirm payment (1 Yes, 0 No): ", 0, 1, &confirm)) return FALSE;
-        if (confirm) report(checkoutOrder(id, discount, tax), "Payment completed.", "Payment not completed.");
-        break;
-    case 8: // Cancel order
-        if (!askOrderIndex(&id, &orderIndex)) return FALSE;
-        if (orderIndex == -1) break;
-        if (!readInt("Confirm cancellation (1 Yes, 0 No): ", 0, 1, &confirm)) return FALSE;
-        if (confirm) report(cancelOrder(id), "Order cancelled.", "Cannot cancel order.");
-        break;
-    case 9: if (!feeSettings()) return FALSE; break;
-    case 10: listOrders(role); break;
-    case 11: listPaidBills(); break;
-    }
-
-    return !(feof(stdin) || ferror(stdin));
+    if (guests <= 2) return 2;
+    if (guests <= 4) return 4;
+    return 8;
 }
 
-// ===================== NAVIGATION =====================
+/* ===================== PRODUCT ===================== */
 
-void showMainMenu(void)
-{
-    int role = menuAccount != NULL ? menuAccount->role : 0;
-    printMenuByRole(role);
-}
+enum {
+    ACT_PRODUCT_SEARCH = 1,
+    ACT_PRODUCT_SHOW,
+    ACT_PRODUCT_ADD,
+    ACT_PRODUCT_UPDATE,
+    ACT_PRODUCT_DELETE
+};
 
-void showModuleMenu(int module)
-{
-    const char *title;
-    const char *const *items;
-    int count, choice, role;
+static const MenuEntry menuProductEntries[] = {
+    { "Search products",                   ACT_PRODUCT_SEARCH, FALSE },
+    { "Show product list (sort)",          ACT_PRODUCT_SHOW,   FALSE },
+    { "Add product",                       ACT_PRODUCT_ADD,    TRUE  },
+    { "Update product",                    ACT_PRODUCT_UPDATE, TRUE  },
+    { "Delete product (mark unavailable)", ACT_PRODUCT_DELETE, TRUE  }
+};
 
-    switch (module) {
-    case 1: title = "MENU ITEM MANAGEMENT"; items = PRODUCT_ITEMS; count = ARRAY_SIZE(PRODUCT_ITEMS); break;
-    case 2: title = "TABLE MANAGEMENT"; items = TABLE_ITEMS; count = ARRAY_SIZE(TABLE_ITEMS); break;
-    case 3: title = "TABLE RESERVATION"; items = RESERVATION_ITEMS; count = ARRAY_SIZE(RESERVATION_ITEMS); break;
-    case 4: title = "ORDERING & BILLING"; items = ORDER_ITEMS; count = ARRAY_SIZE(ORDER_ITEMS); break;
-    default: return;
-    }
-    for (;;) {
-        role = menuAccount != NULL ? menuAccount->role : 0;
-        if (role != ROLE_MANAGER && role != ROLE_STAFF) {
-            puts("Please log in with a valid account first.");
-            return;
-        }
-        printMenu(title, items, count, "Back", module, role);
-        if (!readInt("Choice: ", 0, count, &choice)) return;
-        if (choice == 0) return;
-        if (!runAction(module, choice)) return;
-    }
-}
-
-/* productMenu() is defined only in ProductManager.c and delegates here. */
-void tableMenu(void)       { showModuleMenu(2); }
-void reservationMenu(void) { showModuleMenu(3); }
-void orderMenu(void)       { showModuleMenu(4); }
-
-void accountMenu(Account accounts[], int *accountCount, int currentIndex)
+static void menuSearchProduct(void)
 {
     int choice;
-    if (accounts == NULL || accountCount == NULL) return;
-    for (;;) {
-        if (*accountCount <= 0 || *accountCount > MAX_ACCOUNTS ||
-            currentIndex < 0 || currentIndex >= *accountCount) {
-            puts("Invalid account data.");
-            return;
-        }
-        // SỬA: Kiểm tra quyền thực mỗi lượt, kể cả khi Manager tự chuyển xuống Staff.
-        if (menuAccount != &accounts[currentIndex] ||
-            menuAccount->role != ROLE_MANAGER) {
-            puts("Permission denied. Manager access is required.");
-            return;
-        }
-        printMenu("ACCOUNTS & PASSWORDS", ACCOUNT_ITEMS, ARRAY_SIZE(ACCOUNT_ITEMS), "Back", 5, ROLE_MANAGER);
-        if (!readInt(" >> Enter your choice: ", 0, ARRAY_SIZE(ACCOUNT_ITEMS), &choice)) return;
-        if (choice == 0) return;
+    int id;
+    int type;
+    char keyword[NAME_SIZE];
+
+    do {
+        printf("\n=== SEARCH PRODUCT ===\n");
+        printf("1. Search by ID\n");
+        printf("2. Search by name\n");
+        printf("3. Search by type\n");
+        printf("0. Back\n");
+
+        if (!menuReadChoice(0, 3, &choice)) return;
+
         switch (choice) {
         case 1:
-            createStaffAccount(accounts, accountCount);
-            if (*accountCount <= 0 || *accountCount > MAX_ACCOUNTS) {
-                puts("Invalid account data.");
-                return;
+            if (readInt("Product ID: ", 1, INT_MAX, &id)) {
+                searchProductByID(id);
             }
-            saveAccounts(accounts, *accountCount);
             break;
         case 2:
-            listAccounts(accounts, *accountCount);
-            updateUserRole(accounts, *accountCount);
-            saveAccounts(accounts, *accountCount);
+            if (readName("Name or keyword: ", FALSE, keyword)) {
+                searchProductByName(keyword);
+            }
             break;
-        case 3: listAccounts(accounts, *accountCount); break;
-        case 4:
-            updateOwnAccount(accounts, *accountCount, currentIndex);
-            saveAccounts(accounts, *accountCount);
+        case 3:
+            printf("1. Starter\n");
+            printf("2. Main dish\n");
+            printf("3. Side dish\n");
+            printf("4. Dessert\n");
+            printf("5. Drink\n");
+            if (readInt("Type (1-5): ", STARTER, DRINK, &type)) {
+                searchProductByType(type);
+            }
             break;
-        case 5:
-            // Manager được gọi hàm có sẵn trong Login.h; Staff không vào được menu này.
-            listAccountsNPass(accounts, *accountCount);
+        default:
             break;
         }
-        if (feof(stdin) || ferror(stdin)) return;
+    } while (choice != 0);
+}
+
+static void menuShowProductList(void)
+{
+    int choice;
+
+    do {
+        printf("\n=== SHOW PRODUCT LIST ===\n");
+        printf("1. Sort by ID\n");
+        printf("2. Sort by price (low to high)\n");
+        printf("3. Sort by name (A-Z)\n");
+        printf("0. Back\n");
+
+        if (!menuReadChoice(0, 3, &choice)) return;
+
+        switch (choice) {
+        case 1: sortByID();    break;
+        case 2: sortByPrice(); break;
+        case 3: sortByName();  break;
+        default: break;
+        }
+    } while (choice != 0);
+}
+
+void ProductMenu(int role)
+{
+    int action;
+
+    if (!menuIsValidRole(role)) {
+        puts("Invalid account role.");
+        return;
+    }
+    if (S.productCount < 0 || S.productCount > MAX_PRODUCT) {
+        puts("Invalid product data. Load a valid product file first.");
+        return;
+    }
+
+    for (;;) {
+        action = menuPick("PRODUCT MANAGEMENT", menuProductEntries,
+                          MENU_COUNT(menuProductEntries), role);
+        if (action == MENU_BACK || action == MENU_EOF) return;
+
+        switch (action) {
+        case ACT_PRODUCT_SEARCH: menuSearchProduct();   break;
+        case ACT_PRODUCT_SHOW:   menuShowProductList(); break;
+        case ACT_PRODUCT_ADD:    addProduct();          break;
+        case ACT_PRODUCT_UPDATE: updateProduct();       break;
+        case ACT_PRODUCT_DELETE: deleteProduct();       break;
+        default: break;
+        }
+    }
+}
+
+/* ===================== TABLE (same for both roles) ===================== */
+
+void TableMenu(void)
+{
+    int choice;
+    int tableID;
+    int option;
+    int guests;
+    int index;
+    int newStatus;
+
+    if (S.tableCount < 0 || S.tableCount > MAX_TABLES) {
+        puts("Invalid table data. Load valid data first.");
+        return;
+    }
+
+    do {
+        printf("\n=== TABLE MANAGEMENT ===\n");
+        printf("1. Show tables\n");
+        printf("2. Change table status\n");
+        printf("3. Find available table\n");
+        printf("4. Sort tables by status\n");
+        printf("0. Back\n");
+
+        if (!menuReadChoice(0, 4, &choice)) return;
+
+        switch (choice) {
+        case 1:
+            showTables(S.tables, S.tableCount);
+            break;
+
+        case 2:
+            showTables(S.tables, S.tableCount);
+            if (!readInt("Table ID (0 = back): ", 0, INT_MAX, &tableID)) break;
+            if (tableID == 0) break;
+            if (findTableByID(&S, tableID) == -1) {
+                printf("Table not found.\n");
+                break;
+            }
+            if (!readInt("New status (1 Available, 2 Booked, 3 Serving): ",
+                         1, 3, &option)) break;
+
+            newStatus = (option == 1) ? TABLE_AVAILABLE
+                      : (option == 2) ? TABLE_BOOKED
+                                      : TABLE_SERVING;
+
+            if (updateStatusTable(tableID, newStatus)) {
+                printf("Table status updated.\n");
+            } else {
+                printf("Table status was not changed.\n");
+            }
+            break;
+
+        case 3:
+            if (!readInt("Number of customers (1-8): ", 1, 8, &guests)) break;
+            index = findAvailableTable(&S, guests);
+            if (index < 0 || index >= S.tableCount) {
+                printf("No suitable table available.\n");
+            } else {
+                showTables(&S.tables[index], 1);
+            }
+            break;
+
+        case 4:
+            sortTableByStatus();
+            break;
+
+        default:
+            break;
+        }
+    } while (choice != 0);
+}
+
+/* ===================== RESERVATION (same for both roles) ===================== */
+
+static void menuCreateReservation(void)
+{
+    char name[CUSTOMER_NAME_SIZE];
+    char phone[PHONE_SIZE];
+    DateTime when;
+    int guests;
+    int tableID;
+
+    if (!readInt("Number of guests (1-8): ", 1, 8, &guests) ||
+        !readName("Customer name: ", TRUE, name) ||
+        !readPhone(phone) ||
+        !readBookingTime(&when)) {
+        printf("Invalid input. Reservation was not created.\n");
+        return;
+    }
+
+    showTables(S.tables, S.tableCount);
+    if (!readInt("Table ID (0 = assign automatically): ", 0, INT_MAX, &tableID)) {
+        printf("Invalid input. Reservation was not created.\n");
+        return;
+    }
+
+    if (!createReservation(name, phone, guests, when,
+                           menuTableTypeForGuests(guests), tableID)) {
+        printf("Reservation was not created.\n");
+    }
+}
+
+void ReservationMenu(void)
+{
+    int choice;
+    char phone[PHONE_SIZE];
+
+    if (S.resCount < 0 || S.resCount > MAX_RESERVATIONS) {
+        puts("Invalid reservation data. Load valid data first.");
+        return;
+    }
+
+    do {
+        printf("\n=== RESERVATION MANAGEMENT ===\n");
+        printf("1. Create reservation\n");
+        printf("2. Cancel reservation\n");
+        printf("3. Check in reservation\n");
+        printf("4. List reservations (sorted by booking time)\n");
+        printf("0. Back\n");
+
+        if (!menuReadChoice(0, 4, &choice)) return;
+
+        switch (choice) {
+        case 1:
+            menuCreateReservation();
+            break;
+
+        case 2:
+            if (!readPhone(phone)) {
+                printf("Invalid phone number.\n");
+                break;
+            }
+            if (!cancelReservation(phone)) {
+                printf("Reservation was not cancelled.\n");
+            }
+            break;
+
+        case 3:
+            if (!readPhone(phone)) {
+                printf("Invalid phone number.\n");
+                break;
+            }
+            if (!checkInReservation(phone)) {
+                printf("Check-in failed.\n");
+            }
+            break;
+
+        case 4:
+            sortBookingByTime();
+            printReservation();
+            break;
+
+        default:
+            break;
+        }
+    } while (choice != 0);
+}
+
+/* ===================== ORDER AND BILL ===================== */
+
+enum {
+    ACT_ORDER_CREATE = 1,
+    ACT_ORDER_ADD_FOOD,
+    ACT_ORDER_UPDATE_FOOD,
+    ACT_ORDER_DELETE_FOOD,
+    ACT_ORDER_VIEW_OPEN,
+    ACT_ORDER_PRE_ORDERED,
+    ACT_ORDER_CHECKOUT,
+    ACT_ORDER_CANCEL,
+    ACT_ORDER_CHARGES,
+    ACT_ORDER_HISTORY,
+    ACT_ORDER_BILL_HISTORY
+};
+
+static const MenuEntry menuOrderEntries[] = {
+    { "Create order",                   ACT_ORDER_CREATE,       FALSE },
+    { "Add food to order",              ACT_ORDER_ADD_FOOD,     FALSE },
+    { "Update food quantity",           ACT_ORDER_UPDATE_FOOD,  FALSE },
+    { "Delete food from order",         ACT_ORDER_DELETE_FOOD,  FALSE },
+    { "View open orders",               ACT_ORDER_VIEW_OPEN,    FALSE },
+    { "View pre-ordered dishes",        ACT_ORDER_PRE_ORDERED,  FALSE },
+    { "Checkout and print bill",        ACT_ORDER_CHECKOUT,     FALSE },
+    { "Cancel order",                   ACT_ORDER_CANCEL,       FALSE },
+    { "Configure charge policy",        ACT_ORDER_CHARGES,      FALSE },
+    { "Order history (all orders)",     ACT_ORDER_HISTORY,      TRUE  },
+    { "Bill history",                   ACT_ORDER_BILL_HISTORY, TRUE  }
+};
+
+static const char *menuOrderTypeName(int type)
+{
+    switch (type) {
+    case DINE_IN:  return "Dine-in";
+    case TAKEAWAY: return "Takeaway";
+    case DELIVERY: return "Delivery";
+    default:       return "Unknown";
+    }
+}
+
+/* What staff may see: only orders that are still open (no history). */
+static void menuShowOpenOrders(void)
+{
+    int i;
+    int found = FALSE;
+
+    for (i = 0; i < S.orderCount && i < MAX_ORDERS; i++) {
+        const Order *o = &S.orders[i];
+
+        if (o->orderStatus != ORDER_OPEN) {
+            continue;
+        }
+        found = TRUE;
+        printf("\nOrder %d | Table %d | Reservation %d | %s | Guests %d\n",
+               o->orderID, o->tableID, o->reservationID,
+               menuOrderTypeName(o->orderType), o->NumberCustomer);
+        showAllOrderFood(o);
+    }
+
+    if (!found) {
+        printf("No open orders.\n");
+    }
+}
+
+static void menuPrintBillHistory(void)
+{
+    int i;
+
+    if (S.billCount <= 0) {
+        printf("No bills found.\n");
+        return;
+    }
+
+    printf("\n%-8s %-8s %-8s %-16s %14s\n",
+           "Bill", "Order", "Table", "Time", "Amount due");
+    printf("--------------------------------------------------------------\n");
+    for (i = 0; i < S.billCount && i < MAX_BILLS; i++) {
+        const Bill *b = &S.bills[i];
+
+        printf("%-8d %-8d %-8d %02d/%02d/%04d %02d:%02d %14.2f\n",
+               b->billID, b->orderID, b->tableID,
+               b->timeBill.day, b->timeBill.month, b->timeBill.year,
+               b->timeBill.hour, b->timeBill.minute,
+               b->amountDue);
+    }
+}
+
+/* Edit one field, then hand the whole policy to configureCharges(). */
+static void menuConfigureCharges(void)
+{
+    ChargePolicy policy;
+    double value;
+    int choice;
+    int changed;
+
+    do {
+        policy = S.policy;
+        changed = FALSE;
+
+        printf("\n=== CONFIGURE CHARGE POLICY ===\n");
+        printf("Dine-in rate     : %.2f%%\n", policy.dineInRate);
+        printf("Takeaway rate    : %.2f%%\n", policy.takeawayRate);
+        printf("Delivery base fee: %.2f\n", policy.deliveryBase);
+        printf("Delivery per km  : %.2f\n", policy.deliveryPerKm);
+        printf("1. Change dine-in rate\n");
+        printf("2. Change takeaway rate\n");
+        printf("3. Change delivery base fee\n");
+        printf("4. Change delivery fee per km\n");
+        printf("0. Back\n");
+
+        if (!menuReadChoice(0, 4, &choice)) return;
+
+        switch (choice) {
+        case 1:
+            if (readDouble("New dine-in rate (0-100): ", 0.0, 100.0, &value)) {
+                policy.dineInRate = value;
+                changed = TRUE;
+            }
+            break;
+        case 2:
+            if (readDouble("New takeaway rate (0-100): ", 0.0, 100.0, &value)) {
+                policy.takeawayRate = value;
+                changed = TRUE;
+            }
+            break;
+        case 3:
+            if (readDouble("New delivery base fee: ", 0.0, MAX_PRICE, &value)) {
+                policy.deliveryBase = value;
+                changed = TRUE;
+            }
+            break;
+        case 4:
+            if (readDouble("New delivery fee per km: ", 0.0, MAX_PRICE, &value)) {
+                policy.deliveryPerKm = value;
+                changed = TRUE;
+            }
+            break;
+        default:
+            break;
+        }
+
+        if (changed) {
+            if (configureCharges(policy)) {
+                printf("Charge policy updated.\n");
+            } else {
+                printf("Charge policy was not changed.\n");
+            }
+        }
+    } while (choice != 0);
+}
+
+/*
+ * createOrderTable, addOrderFood, updateOrderFood, deleteOrderFood,
+ * listPreOrderedDishes and cancelOrder (OrderManager.c) ask for their own
+ * input and overwrite their parameters, so the menu only passes placeholders.
+ * checkoutOrder uses its parameters, so those are read here with readBillInput.
+ */
+void OrderMenu(int role)
+{
+    int action;
+    int orderID;
+    double discount;
+    double tax;
+
+    if (!menuIsValidRole(role)) {
+        puts("Invalid account role.");
+        return;
+    }
+    if (S.orderCount < 0 || S.orderCount > MAX_ORDERS ||
+        S.billCount < 0 || S.billCount > MAX_BILLS) {
+        puts("Invalid order or bill data. Load valid data first.");
+        return;
+    }
+
+    for (;;) {
+        action = menuPick("ORDER AND BILL MANAGEMENT", menuOrderEntries,
+                          MENU_COUNT(menuOrderEntries), role);
+        if (action == MENU_BACK || action == MENU_EOF) return;
+
+        switch (action) {
+        case ACT_ORDER_CREATE:       createOrderTable(DINE_IN, 0, 0, 0, 0.0); break;
+        case ACT_ORDER_ADD_FOOD:     addOrderFood(0, 0, 0);                   break;
+        case ACT_ORDER_UPDATE_FOOD:  updateOrderFood(0, 0, 0);                break;
+        case ACT_ORDER_DELETE_FOOD:  deleteOrderFood(0, 0);                   break;
+        case ACT_ORDER_VIEW_OPEN:    menuShowOpenOrders();                    break;
+        case ACT_ORDER_PRE_ORDERED:  listPreOrderedDishes(0);                 break;
+        case ACT_ORDER_CHECKOUT:
+            if (!readBillInput(&orderID, &discount, &tax)) {
+                printf("Invalid bill information.\n");
+            } else if (!checkoutOrder(orderID, discount, tax)) {
+                printf("Checkout failed.\n");
+            } else {
+                printf("Payment completed.\n");
+            }
+            break;
+        case ACT_ORDER_CANCEL:       cancelOrder(0);                          break;
+        case ACT_ORDER_CHARGES:      menuConfigureCharges();                  break;
+        case ACT_ORDER_HISTORY:      showAllOrderTable();                     break;
+        case ACT_ORDER_BILL_HISTORY: menuPrintBillHistory();                  break;
+        default: break;
+        }
     }
 }
