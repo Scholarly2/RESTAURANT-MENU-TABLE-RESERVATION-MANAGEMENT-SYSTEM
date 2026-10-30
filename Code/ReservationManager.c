@@ -315,3 +315,45 @@ void printReservation(void){
                status);
     }
 }
+int showReservationMenu(int role){
+    int role;
+    if (S.resCount<0||S.resCount>MAX_RESERVATIONS){
+        puts("Invalid reservation data. Load a valid reservation first.");
+        return;
+    }
+    if (role== ROLE_MANAGER){
+        do {
+            printf("\n=== RESERVATION MANAGEMENT ===");
+            printf("1. Create reservation");
+            printf("2. Cancel reservation");
+            printf("3. Sort Booking reservation and print");
+            printf("4. CheckIn reservation");
+            printf("0. go back");
+            if (!readInt("Choose: ",0,4,&choice)) return;
+            switch (choice){
+                case 1: createReservation(); break;
+                case 2: cancelReservation(); break;
+                case 3: sortBookingByTime() printReservation(); break;
+                case 4: CheckInReservation(); break;
+                case 0: break;
+            }
+            if (feof(stdin)||ferror(stdin)) return;
+        } while (choice!=0);
+        else{
+            do{
+                printf("\n=== RESERVATION MANAGEMENT ===");
+                printf("1. Create reservation");
+                printf("2. Cancel reservation");
+                printf("3. CheckIN reservation");
+                printf("0. go back");
+                if (!readInt("Choose:",0,3,&choice)) return;
+                switch(choice){
+                    case 1: createReservation(); break;
+                    case 2: cancelReservation(); break;
+                    case 3: checkInReservation(); break;
+                    case 0: break;
+                }
+                if (feof(stdin)||ferror(stdin)) return;
+            } while (choice !=0);
+        }
+    }
