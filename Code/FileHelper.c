@@ -6,7 +6,6 @@
 #include "FileHelper.h"
 #include "RestaurantTypes.h"
 #include "Input.h"
-#include "common.h"
 
 #define dataFile "products.txt"
 
