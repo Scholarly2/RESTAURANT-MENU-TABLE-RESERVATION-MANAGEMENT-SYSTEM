@@ -81,10 +81,6 @@ int main(void)
         return EXIT_FAILURE;
     }
 
-    if (!loadProducts(&S, PRODUCT_FILE)) {
-        fprintf(stderr, "Cannot load restaurant data.\n");
-        return EXIT_FAILURE;
-    }
 
     do {
         int role = accounts[currentAccount].role;

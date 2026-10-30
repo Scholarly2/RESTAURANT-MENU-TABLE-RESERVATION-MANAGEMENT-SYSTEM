@@ -4,7 +4,7 @@
 #include "../Include_type_struct/RestaurantTypes.h"
 
 int saveAllData(const State *s);
-#define PRODUCT_FILE "products.txt"
+#define PRODUCT_FILE "..Data/products.txt"
 
 
 //load and save data product

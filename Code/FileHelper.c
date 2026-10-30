@@ -9,7 +9,7 @@
 #define ORDER_HISTORY_FILE "Data/OrderHistory.txt"
 #define BILL_HISTORY_FILE "Data/BillHistory.txt"
 #include <time.h>
-#define dataFile "products.txt"
+#define dataFile "../Data/products.txt"
 #include <ctype.h>
 
 
@@ -47,12 +47,12 @@ int loadProducts(State *changing, const char *path)
     
     used = 0;
     
-    if (sscanf(line, "PRODUCT|%15[^|]|%15[^\r\n]%n",
-        versionText, countText, &used) != 3)
-        {
-            fclose(file);
-            return FALSE;
-        }
+    if (sscanf(line, "PRODUCT|%15[^|]|%15[^|]|%15[^\r\n]%n",
+           versionText, countText, lastIDText, &used) != 3)
+{
+    fclose(file);
+    return FALSE;
+}
     
     if (used == 0 || strspn(line + used, "\r\n") != strlen(line + used))
     {
@@ -75,12 +75,13 @@ int loadProducts(State *changing, const char *path)
         }
 
         used = 0;
-        if (sscanf(line, "%31[^|]|%99[^|]|%63[^|]|%31[^|]|%31[^|]|%31[^\r\n]%n",
-            idText, name, typeText, priceText, quantityText, statusText, &used) != 6)
-        {
-            fclose(file);
-            return FALSE;
-        }
+        if (sscanf(line, "%31[^|]|%99[^|]|%15[^|]|%63[^|]|%31[^|]|%31[^\r\n]%n",
+           idText, name, typeText, priceText,
+           quantityText, statusText, &used) != 6)
+{
+    fclose(file);
+    return FALSE;
+}
 
         if (used == 0 || strspn(line + used, "\r\n") != strlen(line + used))
         {
@@ -111,7 +112,7 @@ int loadProducts(State *changing, const char *path)
             return FALSE;
         }
 
-        for(j=0; i<i; j++)
+        for(j=0; j<i; j++)
         {
             if(products[j].productID == id) //checkID
             {
@@ -184,7 +185,7 @@ int saveProducts(const State *s, const char *path)
             return FALSE;
         }
         
-        for (j=0; i<i; j++)
+        for (j=0; j<i; j++)
         {
             if(s->products[j].productID == item->productID)
             {
