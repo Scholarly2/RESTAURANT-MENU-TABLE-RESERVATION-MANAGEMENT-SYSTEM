@@ -82,14 +82,10 @@ int main(void)
         return EXIT_FAILURE;
     }
 
-    if (!loadProducts(&S, PRODUCT_FILE))
-{
-    printf("Failed to load product data!\n");
-}
-else
-{
-    printf("Total products: %d\n", S.productCount);
-}
+    if (!loadProducts(&S, PRODUCT_FILE)) {
+        fprintf(stderr, "Cannot load restaurant data.\n");
+        return EXIT_FAILURE;
+    }
 
     do {
         int role = accounts[currentAccount].role;

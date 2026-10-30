@@ -1,4 +1,1 @@
-PRODUCT|2|3|3
-p|1|Fried Rice|35000.00|2|0|100
-p|2|Chicken Soup|25000.00|1|0|50
-p|3|Orange Juice|18000.00|5|0|80
+

@@ -128,7 +128,7 @@ int addProduct(void)
         return FALSE;
     }
 
-    printf("Name format: COM_RANG_DUA_BO, SUP_NAM_TUYET.\n");
+    printf("Name format: Com rang dua bo.\n");
 
     for (;;) {
         if (!readName("Name of product: ", FALSE, name)) {
@@ -615,12 +615,7 @@ int searchProductMenu(void)
     int choice, id;
     char keyword[NAME_SIZE];
     do {
-        puts("\n=== SEARCH PRODUCT ===\n");
-        printf("1. Search by ID\n");
-        printf("2. Search by name\n");
-        printf("0. Back\n");
-        
-
+        puts("\n=== SEARCH PRODUCT ===\n1. Search by ID\n2. Search by name\n0. Back");
         if (!readInt("Choose: ", 0, 2, &choice)) return FALSE;
         switch (choice) {
         case 1:
@@ -653,11 +648,8 @@ int showProductListMenu(void)
 {
     int choice;
     do {
-        puts("\n=== SHOW PRODUCT LIST ===\n");
-        printf("1. Sort by ID\n");
-        printf("2. Sort by price (low to high)\n");
-        printf("3. Sort by name (A-Z)\n");
-        printf("0. Back\n");
+        puts("\n=== SHOW PRODUCT LIST ===");
+        puts("1. Sort by ID\n2. Sort by price (low to high)\n3. Sort by name (A-Z)\n0. Back");
         if (!readInt("Choose: ", 0, 3, &choice)) return FALSE;
         switch (choice) {
         case 1: sortByID(); break;
