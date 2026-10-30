@@ -227,12 +227,14 @@ int saveProducts(const State *s, const char *path)
         }
     }
 
-    file = fopen(path, "w");
+    printf("Opening product file for writing: %s\n", path);
 
-    if (file == NULL)
-    {
-        return FALSE;
-    }
+        file = fopen(path, "w");
+            if (file == NULL)
+        {
+         perror("Cannot open product file for writing");
+                    return FALSE;
+        }
 
     if(fprintf(file, "PRODUCT|2|%d|%d\n", s->productCount, s->lastProductID) < 0)
     {
