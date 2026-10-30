@@ -4,11 +4,7 @@
 #include "../Include_type_struct/RestaurantTypes.h"
 
 int saveAllData(const State *s);
-<<<<<<<<< Temporary merge branch 1
-#define PRODUCT_FILE "..Data/products.txt"
-=========
 #define PRODUCT_FILE "Data/products.txt"
->>>>>>>>> Temporary merge branch 2
 
 
 //load and save data product
