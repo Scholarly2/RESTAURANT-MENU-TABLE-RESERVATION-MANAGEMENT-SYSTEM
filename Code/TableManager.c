@@ -1,10 +1,9 @@
 #include <stdio.h>
-#include "common.h"
 #include "Input.h"
-#include "TableManager.h"
-#include "ReservationManager.h"
-#include "OrderManager.h"
-#include "BillManager.h"
+#include "RestaurantTypes.h"
+#include "menu.h"
+#include "Login.h"
+#include "FileHelper.h"
 
 /* ===================== HELPERS ===================== */
 
