@@ -592,3 +592,37 @@ int saveBillReport(const State *s, const char *path)
     if (fclose(file) != 0) success = FALSE;
     return success;
 }
+
+int saveTableStatus(const State *s, const char *path)
+{
+    FILE *file;
+    int i;
+
+    if (s == NULL || path == NULL ||
+        s->tableCount != 100)
+        return FALSE;
+
+    file = fopen(path, "w");
+    if (file == NULL) return FALSE;
+
+    fprintf(file, "TX|2|100|0|0|0|0\n");
+    fprintf(file, "C|0|0|0|0\n");
+
+    for (i = 0; i < s->tableCount; i++) {
+        const Table *t = &s->tables[i];
+
+        if (fprintf(file, "T|%d|%d|%d|%d|%d\n",
+                    t->tableID,
+                    t->tableNumber,
+                    t->tableType,
+                    t->tableTypeID,
+                    t->tableStatus) < 0) {
+            fclose(file);
+            return FALSE;
+        }
+    }
+
+    if (fclose(file) != 0) return FALSE;
+
+    return TRUE;
+}

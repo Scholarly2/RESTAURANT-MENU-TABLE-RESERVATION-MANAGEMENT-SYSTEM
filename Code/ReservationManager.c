@@ -131,6 +131,19 @@ printf("Next reservation ID: %d\n", nextID(S.lastResID));
         printf("Failed to update table status after reservation creation.\n");
         return FALSE;
     }
+
+    if (!saveTransaction(c, ORDER_HISTORY_FILE)) {
+        free(c);
+        printf("Failed to save reservation.\n");
+        return FALSE;
+    }
+
+    if (!saveTableStatus(c, TABLE_STATUS_FILE)) {
+        free(c);
+        printf("Failed to save table status.\n");
+        return FALSE;
+    }
+
     // update to data
     S = *c;
     free(c);
@@ -232,6 +245,18 @@ int CheckInReservation(const char*phoneNumber){
         free(c);
         return FALSE;
     }
+
+    if (!saveTransaction(c, ORDER_HISTORY_FILE)) {
+        free(c);
+        printf("Failed to save check-in.\n");
+        return FALSE;
+    }
+
+    if (!saveTableStatus(c, TABLE_STATUS_FILE)) {
+        free(c);
+        printf("Failed to save table status.\n");
+        return FALSE;
+    }
     // Update global state
     S = *c;
     free(c);
@@ -287,6 +312,19 @@ int cancelReservation(const char *phoneNumber) {
         printf("Failed to update table status!\n");
         return FALSE;
     }
+
+    if (!saveTransaction(c, ORDER_HISTORY_FILE)) {
+        free(c);
+        printf("Failed to save cancelled reservation.\n");
+        return FALSE;
+    }
+
+    if (!saveTableStatus(c, TABLE_STATUS_FILE)) {
+        free(c);
+        printf("Failed to save table status.\n");
+        return FALSE;
+    }
+    
     //thay doi du lieu
     S = *c;
     free(c);

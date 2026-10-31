@@ -97,32 +97,27 @@ static int findWaitingReservation(const State *s, int tableID)
 
 /* ===================== 3.24 updateStatusAutoTable ===================== */
 
-int updateStatusAutoTable(State *s, int tableID, int event)
-{
-    int i, expected;
+    int updateStatusAutoTable(State *s, int tableID, int event)
+    {
+        int i;
 
-    if (s == NULL) return FALSE;
+        if (s == NULL) return FALSE;
 
-    i = findTableByID(s, tableID);
-    if (i == -1) return FALSE;
+        i = findTableByID(s, tableID);
+        if (i == -1) return FALSE;
 
-    if (event != BOOK && event != CANCEL && event != CHECK_IN
-        && event != PAY_BILL && event != CANCEL_ORDER) {
-        return FALSE;
+        if (event != CHECK_IN && event != BOOK &&
+            event != CANCEL && event != PAY_BILL &&
+            event != CANCEL_ORDER) {
+            return FALSE;
+        }
+
+        //thay doi neu tim thay
+        s->tables[i].tableStatus = getExpectedTableStatus(s, tableID);
+
+        return TRUE;
+
     }
-
-    expected = getExpectedTableStatus(s, tableID);
-
-    if (event == BOOK && expected != TABLE_BOOKED) return FALSE;
-    if (event == CHECK_IN && expected != TABLE_SERVING) return FALSE;
-    if ((event == CANCEL || event == PAY_BILL || event == CANCEL_ORDER)
-        && expected != TABLE_AVAILABLE) {
-        return FALSE;
-    }
-
-    s->tables[i].tableStatus = expected;
-    return TRUE;
-}
 
 /* ===================== shared interactive flows ===================== */
 
@@ -239,6 +234,8 @@ int updateStatusTable(int tableID, int newStatus)
         return cancelOrder(S.orders[o].orderID);
     }
 }
+
+
 
 /* ===================== 3.26 findAvailableTable ===================== */
 

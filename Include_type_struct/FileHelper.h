@@ -2,6 +2,7 @@
 #define FILE_HELPER_H
 
 #include "../Include_type_struct/RestaurantTypes.h"
+#define TABLE_STATUS_FILE "Data/OrderHistoryTables.txt"
 
 int saveAllData(const State *s);
 #define PRODUCT_FILE "Data/products.txt"

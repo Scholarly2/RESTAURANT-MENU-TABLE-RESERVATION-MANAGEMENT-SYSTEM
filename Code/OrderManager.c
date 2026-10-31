@@ -109,6 +109,12 @@ int createOrderTable(int type, int reservationID, int tableID, int guests, doubl
                     printf("Table is invalid.\n");
                     return FALSE;
                 }
+                if (S.tables[tableIndex].tableStatus != TABLE_AVAILABLE) {
+                    printf("Table is not available.\n");
+                    return FALSE;
+                }
+            }
+        }
 
         // TAKEAWAY / DELIVERY
         else{
@@ -152,9 +158,20 @@ int createOrderTable(int type, int reservationID, int tableID, int guests, doubl
         }
 
         // cap nhat trang thai ban
-        if(type == DINE_IN && reservationID == 0){
+        if (type == DINE_IN) {
 
-            if(!updateStatusAutoTable(c, tableID, CHECK_IN)){
+            if (reservationID > 0) {
+                int r = findReservationByID(c, reservationID);
+
+                if (r == -1) {
+                    free(c);
+                    return FALSE;
+                }
+
+                c->reservations[r].reservationStatus = COMPLETED;
+            }
+
+            if (!updateStatusAutoTable(c, tableID, CHECK_IN)) {
                 free(c);
                 printf("Cannot update table status.\n");
                 return FALSE;
@@ -164,15 +181,19 @@ int createOrderTable(int type, int reservationID, int tableID, int guests, doubl
         // luu thay doi vao OrderHistory.txt
         int newOrderID = c->orders[orderIndex].orderID;
 
-        if (!saveTransaction(c, "Data/OrderHistory.txt")) {
+        if (!saveTransaction(c, ORDER_HISTORY_FILE)) {
             free(c);
             printf("Cannot save order history.\n");
             return FALSE;
         }
 
-        // cap nhat State hien tai
-        S = *c;
+        if (!saveTableStatus(c, TABLE_STATUS_FILE)) {
+            free(c);
+            printf("Cannot save table status.\n");
+            return FALSE;
+        }
 
+        S = *c;
         free(c);
 
         printf("Create order successfully. Order ID: %d\n", newOrderID);
@@ -455,6 +476,9 @@ void listPreOrderedDishes(int tableID){
 
 int findOrderByID(const State *s, int id){
     //tim kiem bang ID
+
+    if (s == NULL) return -1;
+
     for(int i = 0; i < S.orderCount; i++){
         if(S.orders[i].orderID == id){
             return i;
@@ -581,9 +605,28 @@ int cancelOrder(int orderID){
 
     copy->orders[orderIndex].orderStatus = ORDER_CANCELLED;
 
+    //chinh status table cua file OrderHistoryTable
+    if(copy->orders[orderIndex].orderType == DINE_IN &&
+    copy->orders[orderIndex].tableID > 0){
+
+        if(!updateStatusAutoTable(copy,
+                                copy->orders[orderIndex].tableID,
+                                CANCEL_ORDER)){
+            free(copy);
+            printf("Cannot update table status.\n");
+            return FALSE;
+        }
+    }
+
     if(!saveTransaction(copy, "Data/OrderHistory.txt")){
         free(copy);
         printf("Cannot save order history.\n");
+        return FALSE;
+    }
+
+    if(!saveTableStatus(copy, TABLE_STATUS_FILE)){
+        free(copy);
+        printf("Cannot save table status.\n");
         return FALSE;
     }
 
