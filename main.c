@@ -10,6 +10,7 @@
 
 State S = {0};
 
+
 static void printMainMenu(int role)
 {
     printf("\n=== RESTAURANT MANAGEMENT ===\n");
@@ -64,6 +65,12 @@ int main(void)
     int accountCount = 0;
     int currentAccount;
     int choice;
+
+    S.tableCount = 0;
+
+	if (!loadTableStatus(&S, TABLE_STATUS_FILE)) {
+	    printf("Cannot load table data.\n");
+	}
 
     loadAccounts(accounts, &accountCount);
     if (accountCount < 0 || accountCount > MAX_ACCOUNTS) {

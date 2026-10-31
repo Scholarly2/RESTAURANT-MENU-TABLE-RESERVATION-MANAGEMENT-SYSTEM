@@ -19,8 +19,10 @@ int saveBillReport(const State *changing, const char *path);
 
 //load va save data transaction
 int saveTransaction(const State *s, const char *path);
+int loadTransaction(State *changing, const char *path);
 
 //load va save table
 int saveAllData(const State *s);
 int saveTableStatus(const State *s, const char *path);
+int loadTableStatus(State *s, const char *path);
 #endif

@@ -486,26 +486,54 @@ int isValidNumber(const char *str)
     return TRUE;
 }
 
-int readInt(const char *prompt,int min, int max, int *value)
+int readInt(const char *prompt, int min, int max, int *value)
 {
     char buf[NAME_SIZE];
+    char *end;
     long v;
 
-    printf("%s", prompt);
-    if (fgets(buf, sizeof(buf), stdin) == NULL) return -1;
-
-    if (strchr(buf, '\n') == NULL) {
-        int ch;
-        while ((ch = getchar()) != '\n' && ch != EOF) { }
+    if (prompt == NULL || value == NULL || min > max) {
+        return FALSE;
     }
-    buf[strcspn(buf, "\r\n")] = '\0';
 
-    if (!isValidNumber(buf)) return FALSE;
+    while (1)
+    {
+        printf("%s", prompt);
 
-    errno = 0;
-    v = strtol(buf, NULL, 10);
-    if (errno == ERANGE || v > INT_MAX || v < INT_MIN) return FALSE;
+        if (fgets(buf, sizeof(buf), stdin) == NULL) {
+            return FALSE;
+        }
 
-    *value = (int)v;
-    return TRUE;
+        // Remove newline
+        buf[strcspn(buf, "\r\n")] = '\0';
+
+        // Skip leading spaces
+        char *start = buf;
+        while (*start == ' ' || *start == '\t') {
+            start++;
+        }
+
+        if (*start == '\0') {
+            printf("Input cannot be empty!\n");
+            continue;
+        }
+
+        errno = 0;
+        v = strtol(start, &end, 10);
+
+        // Check invalid characters
+        while (*end == ' ' || *end == '\t') {
+            end++;
+        }
+
+        if (errno == ERANGE || *end != '\0' ||
+            v < min || v > max) {
+            printf("Invalid input! Please enter a number from %d to %d.\n",
+                   min, max);
+            continue;
+        }
+
+        *value = (int)v;
+        return TRUE;
+    }
 }

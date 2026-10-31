@@ -5,21 +5,19 @@
 #include <stdlib.h>
 #include "../Include_type_struct/FileHelper.h"
 
-State *copyState(const State *s)
+State *copyState(const State *source)
 {
     State *copy;
 
-    if (s == NULL) {
+    if (source == NULL)
         return NULL;
-    }
 
-    copy = (State *)malloc(sizeof(State));
+    copy = malloc(sizeof(*copy));
 
-    if (copy == NULL) {
+    if (copy == NULL)
         return NULL;
-    }
 
-    *copy = *s;
+    *copy = *source; // Chép toàn bộ, gồm tables và tableCount. //
 
     return copy;
 }

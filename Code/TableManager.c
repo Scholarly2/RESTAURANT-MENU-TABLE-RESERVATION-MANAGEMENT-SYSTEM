@@ -6,6 +6,11 @@
 #include "../Include_type_struct/Login.h"
 #include "../Include_type_struct/FileHelper.h"
 
+//T|tableID|tableNumber|tableType|tableTypeID|tableStatus//
+
+/* Match the definition in ReservationManager.c. */
+int CheckInReservation(const char *phoneNumber);
+
 /* ===================== HELPERS ===================== */
 
 const char *statusToString(int status)
@@ -97,31 +102,33 @@ static int findWaitingReservation(const State *s, int tableID)
 
 /* ===================== 3.24 updateStatusAutoTable ===================== */
 
-	int updateStatusAutoTable(State *s, int tableID, int event)
-	{
-	    int i;
-	
-	    if (s == NULL) return FALSE;
-	
-	    i = findTableByID(s, tableID);
-	
-	    if (i == -1) {
-	        printf("Cannot find table: ID=%d, tableCount=%d\n",
-	               tableID, s->tableCount);
-	        return FALSE;
-	    }
-	
-	    if (event != CHECK_IN && event != BOOK &&
-	        event != CANCEL && event != PAY_BILL &&
-	        event != CANCEL_ORDER) {
-	        return FALSE;
-	    }
-	
-	    s->tables[i].tableStatus =
-	        getExpectedTableStatus(s, tableID);
-	
-	    return TRUE;
-	}
+int updateStatusAutoTable(State *s, int tableID, int event)
+{
+    int i, expected;
+
+    if (s == NULL) return FALSE;
+
+    i = findTableByID(s, tableID);
+    if (i == -1) return FALSE;
+
+    if (event != BOOK && event != CANCEL && event != CHECK_IN
+        && event != PAY_BILL && event != CANCEL_ORDER) {
+        return FALSE;
+    }
+
+    expected = getExpectedTableStatus(s, tableID);
+
+    if (event == BOOK && expected != TABLE_BOOKED) return FALSE;
+    if (event == CHECK_IN && expected != TABLE_SERVING) return FALSE;
+    if ((event == CANCEL || event == PAY_BILL || event == CANCEL_ORDER)
+        && expected != TABLE_AVAILABLE) {
+        return FALSE;
+    }
+
+    s->tables[i].tableStatus = expected;
+    return TRUE;
+}
+
 /* ===================== shared interactive flows ===================== */
 
 int promptCreateReservation(int tableID)
@@ -210,7 +217,7 @@ int updateStatusTable(int tableID, int newStatus)
 
         if (r == -1) return FALSE;
         if (newStatus == TABLE_SERVING) {
-            return checkInReservation(S.reservations[r].phoneNumber);
+            return CheckInReservation(S.reservations[r].phoneNumber);
         }
         if (!readInt("Cancel booking 1 Yes 0 No: ", 0, 1, &confirm)) return FALSE;
         if (confirm == 0) return FALSE;
@@ -237,8 +244,6 @@ int updateStatusTable(int tableID, int newStatus)
         return cancelOrder(S.orders[o].orderID);
     }
 }
-
-
 
 /* ===================== 3.26 findAvailableTable ===================== */
 
@@ -299,8 +304,9 @@ void TableMenu(void)
         puts("2. Change table status");
         puts("3. Find available table");
         puts("4. Sort tables by status");
+        puts("5. Add new table");
         puts("0. Back");
-        if (!readInt("Choice: ", 0, 4, &choice) || choice == 0) return;
+        if (!readInt("Choice: ", 0, 5, &choice) || choice == 0) return;
 
         switch (choice) {
         case 1:
@@ -318,6 +324,7 @@ void TableMenu(void)
             break;
         case 3:
             if (!readInt("Number of customers (1-8): ", 1, 8, &guests)) return;
+            printf("Total tables: %d\n", S.tableCount);
             index = findAvailableTable(&S, guests);
             if (index < 0 || index >= S.tableCount) puts("No suitable table available.");
             else showTables(&S.tables[index], 1);
@@ -325,6 +332,45 @@ void TableMenu(void)
         case 4:
             sortTableByStatus();
             break;
-        }
+        case 5:
+			{
+			    Table t = {0};
+			
+			    if (S.tableCount >= MAX_TABLES) {
+			        puts("Table list is full!");
+			        break;
+			    }
+			
+			    if (!readInt("Table ID: ", 1, INT_MAX, &t.tableID)) return;
+			    if (!readInt("Table number: ", 1, INT_MAX, &t.tableNumber)) return;
+			    if (!readInt("Seats (2, 4, 8): ", 2, 8, &t.tableType)) return;
+			
+			    if (t.tableType != 2 && t.tableType != 4 && t.tableType != 8) {
+			        puts("Seats must be 2, 4 or 8!");
+			        break;
+			    }
+			
+			    if (findTableByID(&S, t.tableID) != -1 ||
+			        findTableByNumber(&S, t.tableNumber) != -1) {
+			        puts("Table ID or number already exists!");
+			        break;
+			    }
+			
+			    t.tableTypeID = t.tableType;
+			    t.tableStatus = TABLE_AVAILABLE;
+			
+			    S.tables[S.tableCount] = t;
+			    S.tableCount++;
+			
+			    if (!saveTableStatus(&S, TABLE_STATUS_FILE)) {
+			        S.tableCount--;
+			        puts("Cannot save table!");
+			        break;
+			    }
+			
+			    puts("Table added successfully!");
+			    break;
+			}
     }
+}
 }

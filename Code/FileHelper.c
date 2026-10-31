@@ -599,14 +599,12 @@ int saveTableStatus(const State *s, const char *path)
     int i;
 
     if (s == NULL || path == NULL ||
-        s->tableCount != 100)
+        s->tableCount < 0 || s->tableCount > MAX_TABLES) {
         return FALSE;
+    }
 
     file = fopen(path, "w");
     if (file == NULL) return FALSE;
-
-    fprintf(file, "TX|2|100|0|0|0|0\n");
-    fprintf(file, "C|0|0|0|0\n");
 
     for (i = 0; i < s->tableCount; i++) {
         const Table *t = &s->tables[i];
@@ -623,6 +621,78 @@ int saveTableStatus(const State *s, const char *path)
     }
 
     if (fclose(file) != 0) return FALSE;
+
+    return TRUE;
+}
+
+int loadTableStatus(State *s, const char *path)
+{
+    FILE *file;
+
+    if (s == NULL || path == NULL) {
+        return FALSE;
+    }
+
+    printf("DEBUG: Opening file: %s\n", path);
+
+    file = fopen(path, "r");
+
+    if (file == NULL) {
+        perror("DEBUG: fopen failed");
+        s->tableCount = 0;
+        return TRUE;
+    }
+
+    s->tableCount = 0;
+
+    // File trong thi van la hop le
+    if (fgetc(file) == EOF) {
+        if (ferror(file)) {
+            fclose(file);
+            return FALSE;
+        }
+
+        fclose(file);
+        printf("DEBUG: Table file is empty. Table count = 0.\n");
+        return TRUE;
+    }
+
+    rewind(file);
+
+    char line[256];
+    Table t;
+    int status;
+
+    while (fgets(line, sizeof(line), file) != NULL) {
+
+        if (s->tableCount >= MAX_TABLES) {
+            fclose(file);
+            return FALSE;
+        }
+
+        if (sscanf(line, "T|%d|%d|%d|%d|%d",
+                   &t.tableID,
+                   &t.tableNumber,
+                   &t.tableType,
+                   &t.tableTypeID,
+                   &status) != 5) {
+            fclose(file);
+            return FALSE;
+        }
+
+        t.tableStatus = (enum TableStatus)status;
+
+        s->tables[s->tableCount++] = t;
+    }
+
+    if (ferror(file)) {
+        fclose(file);
+        return FALSE;
+    }
+
+    fclose(file);
+
+    printf("DEBUG: Loaded %d tables.\n", s->tableCount);
 
     return TRUE;
 }

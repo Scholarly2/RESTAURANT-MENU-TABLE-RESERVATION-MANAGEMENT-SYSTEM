@@ -97,10 +97,15 @@ int createOrderTable(int type, int reservationID, int tableID, int guests, doubl
 				
 				// sau do nhap ID va check ID
 				printf("Enter table ID: ");
+				
 				if (scanf("%d", &tableID) != 1) {
-				    printf("Table ID is invalid.\n");
+				    int ch;
+				    while ((ch = getchar()) != '\n' && ch != EOF);
 				    return FALSE;
 				}
+				
+				int ch;
+				while ((ch = getchar()) != '\n' && ch != EOF);
 				
 				int invalidTableID = 0;
 					
@@ -388,8 +393,8 @@ int deleteOrderFood(int orderID, int productID){
     }
 
     int choice;
-    printf("Product: %d ", S.orders[findOrderIndexByID].items[findOrderItemIndex].productName);
-    printf("1.Delete\n2.Cancel\nYour choice: ");
+    printf("Product: %s ", S.orders[findOrderIndexByID].items[findOrderItemIndex].productName);
+    printf("\n1.Delete\n2.Cancel\nYour choice: ");
     if(scanf("%d", &choice) != 1){
         free(copy);
         printf("Invalid choice!");
@@ -664,8 +669,8 @@ int cancelOrder(int orderID){
 void OrderMenu(int role)
 {
     int choice;
+    int chargeChoice;
 
-    // Variables for order functions
     int type = 0;
     int reservationID = 0;
     int tableID = 0;
@@ -677,24 +682,26 @@ void OrderMenu(int role)
     int quantity = 0;
     int newQuantity = 0;
 
-    // Variables for checkout
     double discountRate = 0;
     double taxRate = 0;
 
-    // Variables for charge policy
-    int chargeChoice;
-    double rate, baseFee, perKm;
+    double rate;
+    double baseFee;
+    double perKm;
 
     if (S.orderCount < 0 || S.orderCount > MAX_ORDERS ||
-        S.billCount < 0 || S.billCount > MAX_BILLS) {
+        S.billCount < 0 || S.billCount > MAX_BILLS)
+    {
         puts("Invalid order or bill data. Load valid data first.");
         return;
     }
 
-    // MANAGER MENU
+    /* ================= MANAGER MENU ================= */
+
     if (role == ROLE_MANAGER)
     {
-        do {
+        do
+        {
             printf("\n=== ORDER AND BILL MANAGEMENT ===\n");
             printf("1. Create order\n");
             printf("2. Add food to order\n");
@@ -707,12 +714,17 @@ void OrderMenu(int role)
             printf("9. Configure charge policy\n");
             printf("0. Go back\n");
 
-            if (!readInt("Choose: ", 0, 9, &choice)) {
-                return;
+            if (!readInt("Choose: ", 0, 9, &choice))
+            {
+                if (feof(stdin) || ferror(stdin))
+                    return;
+
+                printf("Invalid input. Please try again.\n");
+                continue;
             }
 
-            switch (choice) {
-
+            switch (choice)
+            {
                 case 1:
                     createOrderTable(type, reservationID, tableID,
                                      guests, distance);
@@ -747,20 +759,29 @@ void OrderMenu(int role)
                     break;
 
                 case 9:
-                    do {
+
+                    /* CHARGE POLICY MENU */
+                    do
+                    {
                         printf("\n=== CONFIGURE CHARGE POLICY ===\n");
                         printf("1. Configure Dine-in Charge\n");
                         printf("2. Configure Takeaway Charge\n");
                         printf("3. Configure Delivery Charge\n");
                         printf("0. Go back\n");
 
-                        if (!readInt("Choose: ", 0, 3, &chargeChoice)) {
-                            return;
+                        if (!readInt("Choose: ", 0, 3, &chargeChoice))
+                        {
+                            if (feof(stdin) || ferror(stdin))
+                                return;
+
+                            printf("Invalid input. Please try again.\n");
+                            continue;
                         }
 
-                        switch (chargeChoice) {
-
+                        switch (chargeChoice)
+                        {
                             case 1:
+
                                 printf("\n=== DINE-IN CHARGE ===\n");
                                 printf("Current rate: %.2f%%\n",
                                        S.policy.dineInRate);
@@ -769,17 +790,24 @@ void OrderMenu(int role)
 
                                 if (scanf("%lf", &rate) != 1 ||
                                     !isfinite(rate) ||
-                                    rate < 0 || rate > 100) {
+                                    rate < 0 || rate > 100)
+                                {
                                     printf("Invalid rate!\n");
-                                    while (getchar() != '\n');
+
+                                    int ch;
+                                    while ((ch = getchar()) != '\n' &&
+                                           ch != EOF);
+
                                     break;
                                 }
 
                                 S.policy.dineInRate = rate;
+
                                 printf("Dine-in charge updated successfully!\n");
                                 break;
 
                             case 2:
+
                                 printf("\n=== TAKEAWAY CHARGE ===\n");
                                 printf("Current rate: %.2f%%\n",
                                        S.policy.takeawayRate);
@@ -788,20 +816,28 @@ void OrderMenu(int role)
 
                                 if (scanf("%lf", &rate) != 1 ||
                                     !isfinite(rate) ||
-                                    rate < 0 || rate > 100) {
+                                    rate < 0 || rate > 100)
+                                {
                                     printf("Invalid rate!\n");
-                                    while (getchar() != '\n');
+
+                                    int ch;
+                                    while ((ch = getchar()) != '\n' &&
+                                           ch != EOF);
+
                                     break;
                                 }
 
                                 S.policy.takeawayRate = rate;
+
                                 printf("Takeaway charge updated successfully!\n");
                                 break;
 
                             case 3:
+
                                 printf("\n=== DELIVERY CHARGE ===\n");
                                 printf("Current base fee: %.2f\n",
                                        S.policy.deliveryBase);
+
                                 printf("Current fee per km: %.2f\n",
                                        S.policy.deliveryPerKm);
 
@@ -809,9 +845,14 @@ void OrderMenu(int role)
 
                                 if (scanf("%lf", &baseFee) != 1 ||
                                     !isfinite(baseFee) ||
-                                    baseFee < 0) {
+                                    baseFee < 0)
+                                {
                                     printf("Invalid base fee!\n");
-                                    while (getchar() != '\n');
+
+                                    int ch;
+                                    while ((ch = getchar()) != '\n' &&
+                                           ch != EOF);
+
                                     break;
                                 }
 
@@ -819,9 +860,14 @@ void OrderMenu(int role)
 
                                 if (scanf("%lf", &perKm) != 1 ||
                                     !isfinite(perKm) ||
-                                    perKm < 0) {
+                                    perKm < 0)
+                                {
                                     printf("Invalid fee per km!\n");
-                                    while (getchar() != '\n');
+
+                                    int ch;
+                                    while ((ch = getchar()) != '\n' &&
+                                           ch != EOF);
+
                                     break;
                                 }
 
@@ -832,45 +878,64 @@ void OrderMenu(int role)
                                 break;
 
                             case 0:
+                                printf("Returning to Order Menu...\n");
                                 break;
                         }
 
-                        if (feof(stdin) || ferror(stdin)) {
+                        if (feof(stdin) || ferror(stdin))
                             return;
-                        }
 
                     } while (chargeChoice != 0);
 
                     break;
 
                 case 0:
+                    printf("Returning to Restaurant Management...\n");
                     break;
             }
 
-            if (feof(stdin) || ferror(stdin)) {
+            if (feof(stdin) || ferror(stdin))
                 return;
-            }
 
         } while (choice != 0);
     }
 
-    // STAFF MENU
+    /* ================= STAFF MENU ================= */
+
     else if (role == ROLE_STAFF)
     {
-        do {
+        do
+        {
             printf("\n=== ORDER AND BILL MANAGEMENT ===\n");
             printf("1. Search orders\n");
-            printf("2. show orders\n");
-            printf("3. print bills\n");
+            printf("2. Show orders\n");
+            printf("3. Print bills\n");
             printf("0. Go back\n");
 
-            if (!readInt("Choose: ", 0, 4, &choice)) {
-                return;
+            if (!readInt("Choose: ", 0, 3, &choice))
+            {
+                if (feof(stdin) || ferror(stdin))
+                    return;
+
+                printf("Invalid input. Please try again.\n");
+                continue;
             }
 
-            switch (choice) {
-
+            switch (choice)
+            {
                 case 1:
+                    printf("Enter order ID: ");
+
+                    if (scanf("%d", &orderID) != 1)
+                    {
+                        printf("Invalid order ID!\n");
+
+                        int ch;
+                        while ((ch = getchar()) != '\n' && ch != EOF);
+
+                        break;
+                    }
+
                     findOrderByID(&S, orderID);
                     break;
 
@@ -879,16 +944,16 @@ void OrderMenu(int role)
                     break;
 
                 case 3:
-                    printBillReport(orderID,discountRate,taxRate);
+                    printBillReport(orderID, discountRate, taxRate);
                     break;
 
                 case 0:
+                    printf("Returning to Restaurant Management...\n");
                     break;
             }
 
-            if (feof(stdin) || ferror(stdin)) {
+            if (feof(stdin) || ferror(stdin))
                 return;
-            }
 
         } while (choice != 0);
     }
