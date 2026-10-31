@@ -70,7 +70,7 @@ TopLine=1
 LeftChar=1
 [Editors]
 Order=13,7,1,5,14
-Focused=14
+Focused=-1
 [Editor_0]
 CursorCol=39
 CursorRow=20
