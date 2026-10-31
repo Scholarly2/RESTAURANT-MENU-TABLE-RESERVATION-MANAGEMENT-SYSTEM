@@ -77,15 +77,29 @@ int createOrderTable(int type, int reservationID, int tableID, int guests, doubl
             }
             else{
 
+                printf("Enter number of guests: ");
+                if(scanf("%d", &guests) != 1 || guests < 1 || guests > 8){
+                    printf("Number of guests is invalid.\n");
+                    return FALSE;
+                }
+
                 printf("Enter table ID: ");
-                if(scanf("%d", &tableID) != 1 || tableID < 1 || tableID > 100){
+                if(scanf("%d", &tableID) != 1){
                     printf("Table ID is invalid.\n");
                     return FALSE;
                 }
 
-                printf("Enter number of guests: ");
-                if(scanf("%d", &guests) != 1 || guests < 1 || guests > 8){
-                    printf("Number of guests is invalid.\n");
+                // Check table ID based on number of guests
+                if(guests == 1 && (tableID < 1 || tableID > 20)){
+                    printf("Please choose a table for 2 guests (ID: 1 - 20).\n");
+                    return FALSE;
+                }
+                else if(guests >= 2 && guests < 4 && (tableID < 21 || tableID > 60)){
+                    printf("Please choose a table for 4 guests (ID: 21 - 60).\n");
+                    return FALSE;
+                }
+                else if(guests >= 4 && (tableID < 61 || tableID > 100)){
+                    printf("Please choose a table for 8 guests (ID: 61 - 100).\n");
                     return FALSE;
                 }
 
@@ -95,35 +109,6 @@ int createOrderTable(int type, int reservationID, int tableID, int guests, doubl
                     printf("Table is invalid.\n");
                     return FALSE;
                 }
-
-                if(S.tables[tableIndex].tableStatus == TABLE_SERVING){
-
-                    int openOrderIndex = findOpenOrder(&S, tableID, 0);
-
-                    if(openOrderIndex == -1 || S.orders[openOrderIndex].isPreOrder){
-                        printf("Cannot use existing order.\n");
-                        return FALSE;
-                    }
-
-                    printf("Use existing order %d.\n",
-                           S.orders[openOrderIndex].orderID);
-
-                    return S.orders[openOrderIndex].orderID;
-                }
-
-                if(S.tables[tableIndex].tableStatus != TABLE_AVAILABLE){
-                    printf("Table is not available.\n");
-                    return FALSE;
-                }
-
-                if(guests > S.tables[tableIndex].tableType){
-                    printf("Number of guests exceeds table capacity.\n");
-                    return FALSE;
-                }
-            }
-
-            distance = 0;
-        }
 
         // TAKEAWAY / DELIVERY
         else{
