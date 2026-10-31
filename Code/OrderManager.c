@@ -711,7 +711,8 @@ void OrderMenu(int role)
             printf("6. View pre-ordered dishes\n");
             printf("7. Checkout and print bill\n");
             printf("8. Cancel order\n");
-            printf("9. Configure charge policy\n");
+            printf("9. Print Bill\n");
+            printf("10. Configure charge policy\n");
             printf("0. Go back\n");
 
             if (!readInt("Choose: ", 0, 9, &choice))
@@ -757,8 +758,11 @@ void OrderMenu(int role)
                 case 8:
                     cancelOrder(orderID);
                     break;
-
                 case 9:
+                	printBillReport(orderID, discountRate, taxRate);
+                	break;
+
+                case 10:
 
                     /* CHARGE POLICY MENU */
                     do

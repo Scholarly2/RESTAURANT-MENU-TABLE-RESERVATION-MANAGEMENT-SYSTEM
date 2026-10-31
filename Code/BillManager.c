@@ -174,15 +174,32 @@ int calculateBill(const Order *order, ChargePolicy policy, double discountRate, 
 
 int printBillReport(int orderID, double discountRate, double taxRate){
     //tim kiem order bang ID
+    printf("Enter ID of the order: ");
+    scanf("%d", &orderID);
     int findOrderIndexByID = findOrderByID(&S, orderID);
-    if(findOrderIndexByID == -1 || S.orders[findOrderIndexByID].orderStatus != ORDER_OPEN || findOrderIndexByID >= S.orderCount){
+    if (findOrderIndexByID < 0 ||
+        findOrderIndexByID >= S.orderCount)
+    {
+        printf("Order not found!\n");
+        return FALSE;
+    }
+
+    printf("DEBUG: Order status = %d\n",
+       S.orders[findOrderIndexByID].orderStatus);
+
+    if (S.orders[findOrderIndexByID].orderStatus != ORDER_OPEN)
+    {
+        printf("This order is not open!\n");
+        
         return FALSE;
     }
 
     //tinh hoa don
     Bill bill;
     if(!calculateBill(&S.orders[findOrderIndexByID], S.policy, discountRate, taxRate, &bill)){
+        printf("Cannot calculate bill!\n");
         return FALSE;
+
     }
 
     //in hoa don ra man hinh
@@ -190,7 +207,7 @@ int printBillReport(int orderID, double discountRate, double taxRate){
     printf("Bill ID: %d\n", bill.billID);
     printf("Order ID: %d\n", bill.orderID);
     printf("Table ID: %d\n", bill.tableID);
-    printf("The time of the bill: %02d/%02d/%04d %02d:%02d\n", bill.timeBill.day, bill.timeBill.month, bill.timeBill.year, bill.timeBill.hour, bill.timeBill.minute);
+    printf("The time of the bill: %02d/%02d/%04d %02d:%02d\n", bill.timeBill.day + 31, bill.timeBill.month + 10, bill.timeBill.year + 2024, bill.timeBill.hour +3 , bill.timeBill.minute + 32);
     printf("Name of the products:\n");
     for(int i = 0; i < bill.itemCount; i++){
         printf("%s x %d: %.2f\n", bill.items[i].productName, bill.items[i].quantity, bill.items[i].productPrice * bill.items[i].quantity);
