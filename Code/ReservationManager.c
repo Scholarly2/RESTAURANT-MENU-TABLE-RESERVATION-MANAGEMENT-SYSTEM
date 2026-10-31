@@ -6,6 +6,7 @@
 #include "../Include_type_struct/menu.h"
 #include "../Include_type_struct/Login.h"
 #include <string.h>
+#include "../Include_type_struct/FileHelper.h"
 
 void sortBookingByTime(void)
 {

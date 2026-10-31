@@ -3,6 +3,7 @@
 
 #include "../Include_type_struct/RestaurantTypes.h"
 #define TABLE_STATUS_FILE "Data/OrderHistoryTables.txt"
+#define ORDER_HISTORY_FILE "Data/OrderHistory.txt"
 
 int saveAllData(const State *s);
 #define PRODUCT_FILE "Data/products.txt"
@@ -18,4 +19,8 @@ int saveBillReport(const State *changing, const char *path);
 
 //load va save data transaction
 int saveTransaction(const State *s, const char *path);
+
+//load va save table
+int saveAllData(const State *s);
+int saveTableStatus(const State *s, const char *path);
 #endif

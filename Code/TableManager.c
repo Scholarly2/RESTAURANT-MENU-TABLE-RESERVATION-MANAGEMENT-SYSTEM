@@ -97,28 +97,31 @@ static int findWaitingReservation(const State *s, int tableID)
 
 /* ===================== 3.24 updateStatusAutoTable ===================== */
 
-    int updateStatusAutoTable(State *s, int tableID, int event)
-    {
-        int i;
-
-        if (s == NULL) return FALSE;
-
-        i = findTableByID(s, tableID);
-        if (i == -1) return FALSE;
-
-        if (event != CHECK_IN && event != BOOK &&
-            event != CANCEL && event != PAY_BILL &&
-            event != CANCEL_ORDER) {
-            return FALSE;
-        }
-
-        //thay doi neu tim thay
-        s->tables[i].tableStatus = getExpectedTableStatus(s, tableID);
-
-        return TRUE;
-
-    }
-
+	int updateStatusAutoTable(State *s, int tableID, int event)
+	{
+	    int i;
+	
+	    if (s == NULL) return FALSE;
+	
+	    i = findTableByID(s, tableID);
+	
+	    if (i == -1) {
+	        printf("Cannot find table: ID=%d, tableCount=%d\n",
+	               tableID, s->tableCount);
+	        return FALSE;
+	    }
+	
+	    if (event != CHECK_IN && event != BOOK &&
+	        event != CANCEL && event != PAY_BILL &&
+	        event != CANCEL_ORDER) {
+	        return FALSE;
+	    }
+	
+	    s->tables[i].tableStatus =
+	        getExpectedTableStatus(s, tableID);
+	
+	    return TRUE;
+	}
 /* ===================== shared interactive flows ===================== */
 
 int promptCreateReservation(int tableID)
@@ -207,7 +210,7 @@ int updateStatusTable(int tableID, int newStatus)
 
         if (r == -1) return FALSE;
         if (newStatus == TABLE_SERVING) {
-            return CheckInReservation(S.reservations[r].phoneNumber);
+            return checkInReservation(S.reservations[r].phoneNumber);
         }
         if (!readInt("Cancel booking 1 Yes 0 No: ", 0, 1, &confirm)) return FALSE;
         if (confirm == 0) return FALSE;

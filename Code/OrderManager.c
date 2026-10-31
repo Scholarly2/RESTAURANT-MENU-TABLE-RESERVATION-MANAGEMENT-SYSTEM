@@ -42,7 +42,7 @@ int createOrderTable(int type, int reservationID, int tableID, int guests, doubl
     // tao order moi
     for(int i = 0; i < n; i++){
 
-        printf("Enter customer type (DINE_IN / TAKEAWAY / DELIVERY): ");
+        printf("Enter customer type (1. DINE_IN /2. TAKEAWAY /3. DELIVERY): ");
         if(scanf("%d", &type) != 1 || type < DINE_IN || type > DELIVERY){
             printf("Customer type is invalid.\n");
             return FALSE;
@@ -76,33 +76,56 @@ int createOrderTable(int type, int reservationID, int tableID, int guests, doubl
                 }
             }
             else{
-
-                printf("Enter number of guests: ");
-                if(scanf("%d", &guests) != 1 || guests < 1 || guests > 8){
-                    printf("Number of guests is invalid.\n");
-                    return FALSE;
-                }
-
-                printf("Enter table ID: ");
-                if(scanf("%d", &tableID) != 1){
-                    printf("Table ID is invalid.\n");
-                    return FALSE;
-                }
-
-                // Check table ID based on number of guests
-                if(guests == 1 && (tableID < 1 || tableID > 20)){
-                    printf("Please choose a table for 2 guests (ID: 1 - 20).\n");
-                    return FALSE;
-                }
-                else if(guests >= 2 && guests < 4 && (tableID < 21 || tableID > 60)){
-                    printf("Please choose a table for 4 guests (ID: 21 - 60).\n");
-                    return FALSE;
-                }
-                else if(guests >= 4 && (tableID < 61 || tableID > 100)){
-                    printf("Please choose a table for 8 guests (ID: 61 - 100).\n");
-                    return FALSE;
-                }
-
+            	
+            	//nhap so luong khach
+				printf("Enter number of guests: ");
+				if (scanf("%d", &guests) != 1 || guests < 1 || guests > 8) {
+				    printf("Number of guests is invalid.\n");
+				    return FALSE;
+				}
+				
+				// dua vao so luong khach de chon ra ban phu hop
+				if (guests <= 2) {
+				    printf("Please choose a table for 2 guests (ID: 1 - 20).\n");
+				}
+				else if (guests <= 4) {
+				    printf("Please choose a table for 4 guests (ID: 21 - 60).\n");
+				}
+				else {
+				    printf("Please choose a table for 8 guests (ID: 61 - 100).\n");
+				}
+				
+				// sau do nhap ID va check ID
+				printf("Enter table ID: ");
+				if (scanf("%d", &tableID) != 1) {
+				    printf("Table ID is invalid.\n");
+				    return FALSE;
+				}
+				
+				int invalidTableID = 0;
+					
+				if (guests <= 2) {
+				    if (tableID < 1 || tableID > 20) {
+				        printf("Invalid table ID for 2 guests.\n");
+				        return FALSE;
+				    }
+				}
+				else if (guests <= 4) {
+				    if (tableID < 21 || tableID > 60) {
+				        printf("Invalid table ID for 4 guests.\n");
+				        return FALSE;
+				    }
+				}
+				else {
+				    if (tableID < 61 || tableID > 100) {
+				        printf("Invalid table ID for 8 guests.\n");
+				        return FALSE;
+				    }
+					
+					if (invalidTableID) {
+					    return FALSE;
+					}
+					
                 int tableIndex = findTableByID(&S, tableID);
 
                 if(tableIndex == -1){
@@ -115,7 +138,7 @@ int createOrderTable(int type, int reservationID, int tableID, int guests, doubl
                 }
             }
         }
-
+	}
         // TAKEAWAY / DELIVERY
         else{
 
