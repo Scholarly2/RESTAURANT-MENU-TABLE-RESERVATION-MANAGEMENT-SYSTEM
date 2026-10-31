@@ -128,7 +128,7 @@ int addProduct(void)
         return FALSE;
     }
 
-    printf("Name format: Com rang dua bo.\n");
+    printf("Name format: COM_RANG_DUA_BO, SUP_NAM_TUYET.\n");
 
     for (;;) {
         if (!readName("Name of product: ", FALSE, name)) {
@@ -551,7 +551,7 @@ void searchProductByName(const char *keyword)
     int j;
     int count = 0;
 
-    if (!isValidName(keyword) ||
+    if (!isValidProductName(keyword) ||
         S.productCount < 0 ||
         S.productCount > MAX_PRODUCT) {
         printf("Invalid search data.\n");

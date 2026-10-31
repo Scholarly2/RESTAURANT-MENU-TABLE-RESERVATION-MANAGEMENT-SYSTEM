@@ -353,12 +353,12 @@ void ReservationMenu(int role){
     }
     if (role== ROLE_MANAGER){
         do {
-            printf("\n=== RESERVATION MANAGEMENT ===\n");
-            printf("1. Create reservation\n");
-            printf("2. Cancel reservation\n");
-            printf("3. Sort Booking reservation and print\n");
-            printf("4. CheckIn reservation\n");
-            printf("0. go back\n");
+            printf("\n=== RESERVATION MANAGEMENT ===");
+            printf("1. Create reservation");
+            printf("2. Cancel reservation");
+            printf("3. Sort Booking reservation and print");
+            printf("4. CheckIn reservation");
+            printf("0. go back");
             if (!readInt("Choose: ",0,4,&choice)) return;
 		switch (choice) {
 		    case 1:
@@ -368,29 +368,8 @@ void ReservationMenu(int role){
 		        int NumberCustomer;
 		        DateTime timeBooking;
 		        int tableType;
-		        int requestedTableID=0;
-		    printf("Enter customer phone number:");
-			scanf("%19s",phoneNumber);
-			printf("Enter name Customer:");
-			scanf(" %19[^\n]",nameCustomer);
-			printf("Number of customer:");
-			scanf("%d",&NumberCustomer);
-			printf("Enter booking year: ");
-            scanf("%d", &timeBooking.year);
-            printf("Enter booking month: ");
-            scanf("%d", &timeBooking.month);
-            printf("Enter booking day: ");
-            scanf("%d", &timeBooking.day);
-            printf("Enter booking hour: ");
-            scanf("%d", &timeBooking.hour);
-            printf("Enter booking minute: ");
-        	scanf("%d", &timeBooking.minute);
-        	 if (NumberCustomer <= 2)
-        tableType = 2;
-    else if (NumberCustomer <= 4)
-        tableType = 4;
-    else
-        tableType = 8;
+		        int requestedTableID;
+		
 		        // Nhập thông tin khách hàng và đặt bàn tại đây
 		        createReservation(nameCustomer, phoneNumber,
 		                          NumberCustomer, timeBooking,
@@ -433,11 +412,11 @@ void ReservationMenu(int role){
     }
         else{
             do{
-                printf("\n=== RESERVATION MANAGEMENT ===\n");
-                printf("1. Create reservation\n");
-                printf("2. Cancel reservation\n");
-                printf("3. CheckIN reservation\n");
-                printf("0. go back\n");
+                printf("\n=== RESERVATION MANAGEMENT ===");
+                printf("1. Create reservation");
+                printf("2. Cancel reservation");
+                printf("3. CheckIN reservation");
+                printf("0. go back");
                 if (!readInt("Choose:",0,3,&choice)) return;
                 switch(choice){
 			case 1: {
@@ -447,28 +426,7 @@ void ReservationMenu(int role){
 			    DateTime timeBooking;
 			    int tableType;
 			    int requestedTableID;
-			printf("Enter customer phone number:");
-			scanf("%19s",phoneNumber);
-			printf("Enter name Customer:\n");
-			scanf(" %19[^\n]",nameCustomer);
-			printf("Number of customer:\n");
-			scanf("%d",&NumberCustomer);
-			printf("Enter booking year: \n");
-            scanf("%d", &timeBooking.year);
-            printf("Enter booking month: \n");
-            scanf("%d", &timeBooking.month);
-            printf("Enter booking day: \n");
-            scanf("%d", &timeBooking.day);
-            printf("Enter booking hour: \n");
-            scanf("%d", &timeBooking.hour);
-            printf("Enter booking minute: \n");
-        	scanf("%d", &timeBooking.minute);
-        	        	 if (NumberCustomer <= 2)
-        tableType = 2;
-    else if (NumberCustomer <= 4)
-        tableType = 4;
-    else
-        tableType = 8;
+			
 			    // Nhập thông tin trước khi gọi hàm
 			    createReservation(nameCustomer, phoneNumber,
 			                      NumberCustomer, timeBooking,

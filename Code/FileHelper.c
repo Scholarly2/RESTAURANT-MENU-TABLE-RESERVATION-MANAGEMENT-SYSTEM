@@ -196,11 +196,13 @@ int saveProducts(const State *s, const char *path)
     {
         const MenuItem *item = &s->products[i];
 
-        if (memchr(item, 0, sizeof(MenuItem)) == NULL)
-        {
-            return FALSE;
-        }
-
+        if (memchr(item->productName, '\0',
+           sizeof(item->productName)) == NULL)
+{
+    printf("Invalid product name termination. ID: %d\n",
+           item->productID);
+    return FALSE;
+}
         if (item->productID <=0||
             item->productID > s->lastProductID||
             !isValidName(item->productName)||
@@ -229,12 +231,12 @@ int saveProducts(const State *s, const char *path)
 
     printf("Opening product file for writing: %s\n", path);
 
-file = fopen(path, "w");
-if (file == NULL)
-{
-    perror("Cannot open product file for writing");
+	file = fopen(path, "w");
+	if (file == NULL)
+	{
+    printf("Cannot open product file for writing");
     return FALSE;
-}
+	}
 
     if(fprintf(file, "PRODUCT|2|%d|%d\n", s->productCount, s->lastProductID) < 0)
     {
